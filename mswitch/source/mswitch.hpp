@@ -142,7 +142,6 @@ private:
     bool state_ = false;
     uint8_t p1_ = 0;
     uint8_t p2_ = 0;
-
 };
 
 #endif // MSWITCH_HPP

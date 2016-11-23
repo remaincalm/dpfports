@@ -122,6 +122,7 @@ void MswitchPlugin::run(const float** inputs, float** outputs, uint32_t frames, 
         MidiEvent event = events[i];
         if (event.size == 3 && event.data[0] == p1_ && event.data[1] == p2_ /* ignore data[2] */) {
             state_ = !state_;
+            break;
         }
     }
     if (state_) {
