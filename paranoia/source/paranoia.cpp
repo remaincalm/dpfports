@@ -165,11 +165,11 @@ void ParanoiaPlugin::setParameterValue(uint32_t index, float value) {
 }
 
 void ParanoiaPlugin::fixCrushParams() {
-    bitdepth_ = (value < 50) ? 6 : 10;
-    if (value > 99.0) {
+    bitdepth_ = (crush_ < 50) ? 6 : 10;
+    if (crush_ > 99.0) {
         resample_hz_ = srate;
     } else {
-        resample_hz_ = 300 + fabs(40000.0 - 600.0 * value);
+        resample_hz_ = 300 + fabs(40000.0 - 600.0 * crush_);
     }
     per_sample_ = srate / (float) resample_hz_;
     bitscale_ = pow(2, bitdepth_ - 1) - 0.5;
@@ -179,7 +179,7 @@ void ParanoiaPlugin::fixFilterParams() {
     // calc params from meta-param
     if (filter_ <= 80) {
         filter_mode_ = MODE_BANDPASS;
-        filter_res_ = 10.0 + fdiv(filter_ * 4.0, 80.0);
+        filter_res_ = 10 + ((int) filter_ / 20);
     } else if (filter_ <= 99) {
         filter_res_ = 40.0;
         filter_mode_ = MODE_HPF;

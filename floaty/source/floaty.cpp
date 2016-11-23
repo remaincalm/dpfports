@@ -263,7 +263,7 @@ signal_t FloatyPlugin::process(Channel& ch, const signal_t in) {
         return in + 2.0 * mix_ * curr;
     } else {
         // wet full vol, fade out dry
-        return curr + 2.0 * (1.0 - mix) * in;
+        return curr + 2.0 * (1.0 - mix_) * in;
     }
 }
 

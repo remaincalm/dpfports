@@ -55,7 +55,7 @@ public:
     signal_t process(const signal_t in) {
         otm = 0.99 * otm + in - itm;
         itm = in;
-        return ch.otm;
+        return otm;
     }
 private:
     signal_t otm = 0;
