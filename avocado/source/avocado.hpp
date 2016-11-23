@@ -32,24 +32,15 @@ typedef float signal_t; // signal value
 
 const float PI = 3.141592653589793;
 
-const samples_t RESAMPLE_MAX = 48000;
+const int MAX_BUFFERS = 16;
+const int MAX_BUFLEN = 48000 * 1.0;
+const int FADE_SAMPLES = 32;
 
-// waveshapes
-const float PRE_SHAPER = 0.857;
-const float POST_SHAPER = 0.9;
-const float CLAMP = 0.9;
 
 const int NUM_PROGRAMS = 1;
 
 class AvocadoPlugin : public Plugin {
 public:
-
-    enum FilterMode {
-        MODE_OFF = 0,
-        MODE_LPF = 1,
-        MODE_BANDPASS = 2,
-        MODE_HPF = 3,
-    };
 
     enum Parameters {
         PARAM_DRY_DB,
@@ -59,7 +50,10 @@ public:
 
     struct Channel {
     public:
-        signal_t buffer[1024 * 1024] = {0};
+        Channel() {
+            memset(buffer, 0, MAX_BUFFERS * MAX_BUFLEN * sizeof(signal_t));
+        }
+        signal_t buffer[MAX_BUFFERS][MAX_BUFLEN] = {0};
 
         void tick() {
             //
@@ -168,6 +162,8 @@ protected:
 private:
     signal_t process(Channel& ch, const signal_t in);
     void record(Channel& ch, const signal_t in);
+    signal_t playback(Channel& ch, const signal_t in);
+    float gate(Channel& ch, const signal_t in);
 
     Channel left_;
 
@@ -185,13 +181,20 @@ private:
     int playback_buffer_ = 0;
     int playback_csr_ = 0;
     bool is_recording_ = false;
-    const int fade_samples_ = 0;
+    
 
     float repeat_probability_;
     float fadeout_probability_;
     float max_thresh_ = 0;
     float threshold_ = 0;
-
+    //
+    float thresh = 0;
+    float max_thresh = 0;
+    float target_gain = 0;
+    float gain = 0;
+    float last_gain = 0;
+    float attack_ = 0;
+    float mix_ = 0;
 
     // 
     samples_t srate;

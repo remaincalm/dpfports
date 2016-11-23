@@ -27,6 +27,7 @@ Avocado is a bit crusher, distortion, resampler and mangler.
 #include "DistrhoPlugin.hpp"
 #include "avocado.hpp"
 #include "math.h"
+#include "random.h"
 
 void AvocadoPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
@@ -115,6 +116,11 @@ void AvocadoPlugin::setParameterValue(uint32_t index, float value) {
     }
 }
 
+float rand(float f) {
+    // TODO implement
+    return 0;
+}
+
 /**
   Run/process function for plugins without MIDI input.
  */
@@ -137,11 +143,10 @@ void AvocadoPlugin::record(Channel& ch, const signal_t in) {
      */
 
     if (is_recording_) {
-        ch.buffer[max_bufsiz_ * record_buffer_ + record_csr_] = in;
+        ch.buffer[record_buffer_][record_csr_] = in;
         record_csr_ += 1;
-
         if (record_csr_ > bufsiz_) {
-            // TODO: measure volume level of that block
+            // hit end of buffer
             is_recording_ = false;
         }
     } else {
@@ -152,9 +157,7 @@ void AvocadoPlugin::record(Channel& ch, const signal_t in) {
     }
 }
 
-signal_t AvocadoPlugin::process(Channel& ch, const signal_t in) {
-
-    record(ch, in);
+signal_t AvocadoPlugin::playback(Channel& ch, const signal_t in) {
 
     /*
     playback:
@@ -162,60 +165,70 @@ signal_t AvocadoPlugin::process(Channel& ch, const signal_t in) {
       play selected buffer
      */
     if (playback_csr_ > bufsiz_) {
-
         playback_csr_ = 0;
-
-        // TODO: try and choose a block that matches last input volume level?
-
-        if (rand(100) > repeat_probability_) {
-            playback_buffer_ = (int) (rand(buffer_count_));
-        }
-
-        // fadeout block?
-        if (rand(100) > 105 - fadeout_probability_) {
-            for (int i = 0; i < bufsiz_; ++i) {
-                ch.buffer[max_bufsiz_ * playback_buffer_ + i] *= 0.85;
-            }
-        }
+        //
+        //        if (rand(100) > repeat_probability_) {
+        //            playback_buffer_ = (int) (rand(buffer_count_));
+        //        }
+        //
+        //        // fadeout block?
+        //        if (rand(100) > 105 - fadeout_probability_) {
+        //            for (int i = 0; i < bufsiz_; ++i) {
+        //                ch.buffer[max_bufsiz_ * playback_buffer_ + i] *= 0.85;
+        //            }
+        //        }
     }
 
     // fade edges
     float mult = 1;
 
-    if (playback_csr_ < fade_samples_) {
-        mult = (float) playback_csr_ / (float) fade_samples_;
-    } else if (playback_csr_ > bufsiz_ - fade_samples_) {
-        mult = (float) (bufsiz_ - playback_csr_ - 1) / (float) fade_samples;
+    if (playback_csr_ < FADE_SAMPLES) {
+        mult = (float) playback_csr_ / (float) FADE_SAMPLES;
+    } else if (playback_csr_ > bufsiz_ - FADE_SAMPLES) {
+        mult = (float) (bufsiz_ - playback_csr_ - 1) / (float) FADE_SAMPLES;
     }
 
     // calculate raw output
-    signal_t curr = mult * ch.buffer[max_bufsiz_ * playback_buffer_ + playback_csr_];
+    signal_t curr = mult * ch.buffer[playback_buffer_][playback_csr_];
 
     // move cursor
     playback_csr_ += 1;
+    return curr;
+}
 
+float AvocadoPlugin::gate(Channel& ch, const signal_t in) {
+    //    // gate
+    //    // calculate threshold - moving slightly to correct for input level
+    //    if (fabs(in) > thresh) {
+    //        thresh = thresh * 0.9 + 0.1 * fabs(in);
+    //    } else {
+    //        thresh = thresh * 0.98 + 0.02 * fabs(in);
+    //    }
+    //
+    //    if (thresh > fmax(threshold_ / 100.0, max_thresh_ * threshold_ / 65.0)) {
+    //        target_gain = 1;
+    //    } else {
+    //        target_gain = 1 - (mix_ / 100);
+    //    }
+    //    max_thresh = (thresh > max_thresh) ? max(max_thresh, max_thresh * 0.1 + thresh * 0.9) : max_thresh * 0.99998;
+    return 1.0;
+}
 
-    // calculate threshold - moving slightly to correct for input level
-    if (fabs(in) > thresh) {
-        thresh = thresh * 0.9 + 0.1 * fabs(in);
-    } else {
-        thresh = thresh * 0.98 + 0.02 * fabs(in);
-    }
+signal_t AvocadoPlugin::process(Channel& ch, const signal_t in) {
 
-    if (thresh > max(threshold_ / 100, max_thresh_ * threshold_ / 65)) {
-        target_gain = 1;
-    } else {
-        target_gain = 1 - (mix_ / 100);
-    }
-    max_thresh = (thresh > max_thresh) ? max(max_thresh, max_thresh * 0.1 + thresh * 0.9) : max_thresh * 0.99998;
+    record(ch, in);
+    signal_t curr = playback(ch, in);
+    signal_t target_gain = gate(ch, in);
+    //
+    //    // output mix
+    //    if (target_gain > gain) {
+    //        gain = gain * 0.95 + 0.05 * target_gain;
+    //    } else {
+    //        gain = gain * (1 - attack_ / 100000) + attack_ / 100000 * target_gain;
+    //    }
+    //    last_gain = gain;
 
-    // output mix
-    if (target_gain > gain) {
-        gain = gain * 0.95 + 0.05 * target_gain;
-    } else {
-        gain = gain * (1 - attack_ / 100000) + attack_ / 100000 * target_gain;
-    }
-    last_gain = gain;
+    float gain = 0.5;
 
     // output
     in = in * gain + curr * (1 - gain);
