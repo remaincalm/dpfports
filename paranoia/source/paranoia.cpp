@@ -168,8 +168,10 @@ void ParanoiaPlugin::fixCrushParams() {
     bitdepth_ = (crush_ < 50) ? 6 : 10;
     if (crush_ > 99.0) {
         resample_hz_ = srate;
+    } else if (crush_ > 50) {
+        resample_hz_ = 300.0 + (crush_ - 50.0)*600.0;
     } else {
-        resample_hz_ = 300 + fabs(40000.0 - 600.0 * crush_);
+        resample_hz_ = 300.0 + (50.0 - crush_) * 600.0;
     }
     per_sample_ = srate / (float) resample_hz_;
     bitscale_ = pow(2, bitdepth_ - 1) - 0.5;

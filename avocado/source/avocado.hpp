@@ -32,10 +32,9 @@ typedef float signal_t; // signal value
 
 const float PI = 3.141592653589793;
 
-const int MAX_BUFFERS = 16;
-const int MAX_BUFLEN = 48000 * 1.0;
-const int FADE_SAMPLES = 32;
-
+const int MAX_BUFLEN = 48000 * 4.0; // 4 sec
+const int MAX_BUFFERS = 8;
+const int FADE_SAMPLES = 128;
 
 const int NUM_PROGRAMS = 1;
 
@@ -43,17 +42,20 @@ class AvocadoPlugin : public Plugin {
 public:
 
     enum Parameters {
-        PARAM_DRY_DB,
-        PARAM_WET_DB,
+        PARAM_MIX,
+        PARAM_BUF_LENGTH,
+        PARAM_BUF_COUNT,
+        PARAM_CHARACTER,
         PARAM_COUNT
     };
 
     struct Channel {
     public:
+
         Channel() {
-            memset(buffer, 0, MAX_BUFFERS * MAX_BUFLEN * sizeof(signal_t));
+            memset(buffer, 0, MAX_BUFFERS * MAX_BUFLEN * sizeof (signal_t));
         }
-        signal_t buffer[MAX_BUFFERS][MAX_BUFLEN] = {0};
+        signal_t buffer[MAX_BUFFERS][MAX_BUFLEN] = {};
 
         void tick() {
             //
@@ -169,39 +171,32 @@ private:
 
     // params    
     // gain
-    const float gain_db_ = 6.0;
-    SmoothParam<float> dry_out_db_ = 0.4;
-    SmoothParam<float> wet_out_db_ = 0.4;
+    SmoothParam<float> mix_ = 0.4;
 
-    int buffer_count_ = 0;
-    int max_bufsiz_ = 0;
-    int bufsiz_ = 0;
+    // glitcher
+    int buffer_count_ = 4;
+    int buffer_size_ = 2048;
     int record_csr_ = 0;
     int record_buffer_ = 0;
     int playback_buffer_ = 0;
     int playback_csr_ = 0;
     bool is_recording_ = false;
-    
 
-    float repeat_probability_;
-    float fadeout_probability_;
-    float max_thresh_ = 0;
-    float threshold_ = 0;
-    //
-    float thresh = 0;
-    float max_thresh = 0;
-    float target_gain = 0;
-    float gain = 0;
-    float last_gain = 0;
-    float attack_ = 0;
-    float mix_ = 0;
+    // params
+    SmoothParam<float> repeat_prob_ = 20;
+
+    // gate
+    signal_t leaky_integrator = 0;
+    const float leakage = 0.99;
+    const float threshold_ = 0.02;
+    const float attack_ = 0.005;
+    float gain_ = 0;
 
     // 
     samples_t srate;
 
     void tick() {
-        dry_out_db_.tick();
-        wet_out_db_.tick();
+        mix_.tick();
         left_.tick();
     }
 };

@@ -195,6 +195,13 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
             break;
 
         case PARAM_PLAYBACK_RATE:
+            // fix to steps 0.5 increments
+            // acceptable values:
+            // [-2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2]
+            value = ((int) (2 * value)) / 2.0;
+            if (value == 0) {
+                value = 1;
+            }
             playback_rate_ = value;
             break;
     }

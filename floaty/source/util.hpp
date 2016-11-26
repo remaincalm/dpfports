@@ -59,7 +59,7 @@ private:
     T start = 0;
     T end = 0;
     int t = 0;
-    const int len = 7200; // ~150ms at 48kHz
+    const int len = 4800; // ~100ms at 48kHz
 };
 
 #endif

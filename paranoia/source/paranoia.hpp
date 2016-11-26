@@ -104,7 +104,7 @@ private:
         Mangle manglers[NUM_MANGLERS][MANGLER_BITDEPTH] = {
             { I, I, I, I, I, I, I, I},
             { I, I, I, I, I, I, I, O},
-            { I, I, I, I, I, I, I, X},
+            { I, I, I, I, I, I, I, X}, //
             { I, I, I, I, I, I, O, I},
             { I, I, I, I, I, I, X, I},
             { I, I, I, I, I, O, O, I},

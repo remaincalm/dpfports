@@ -27,7 +27,7 @@ Avocado is a bit crusher, distortion, resampler and mangler.
 #include "DistrhoPlugin.hpp"
 #include "avocado.hpp"
 #include "math.h"
-#include "random.h"
+#include "stdlib.h"
 
 void AvocadoPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
@@ -40,9 +40,10 @@ void AvocadoPlugin::initProgramName(uint32_t index, String& programName) {
 void AvocadoPlugin::loadProgram(uint32_t index) {
     switch (index) {
         case 0:
-            setParameterValue(PARAM_DRY_DB, -96);
-            setParameterValue(PARAM_WET_DB, -3);
-
+            setParameterValue(PARAM_MIX, 50);
+            setParameterValue(PARAM_BUF_LENGTH, 45);
+            setParameterValue(PARAM_BUF_COUNT, 4);
+            setParameterValue(PARAM_CHARACTER, 20);
             break;
     }
 }
@@ -55,24 +56,43 @@ void AvocadoPlugin::initParameter(uint32_t index, Parameter& parameter) {
     parameter.hints = kParameterIsAutomable;
 
     switch (index) {
-        case PARAM_DRY_DB:
-            parameter.name = "Dry Out";
-            parameter.symbol = "dry";
-            parameter.unit = "dB";
-            parameter.ranges.def = -96;
-            parameter.ranges.min = -96;
-            parameter.ranges.max = 6;
+
+        case PARAM_MIX:
+            parameter.name = "Mix";
+            parameter.symbol = "mix";
+            parameter.unit = "%";
+            parameter.ranges.def = 40;
+            parameter.ranges.min = 0;
+            parameter.ranges.max = 100;
             break;
 
-        case PARAM_WET_DB:
-            parameter.name = "Wet Out";
-            parameter.symbol = "wet";
-            parameter.unit = "dB";
-            parameter.ranges.def = -3;
-            parameter.ranges.min = -96;
-            parameter.ranges.max = 6;
+        case PARAM_BUF_LENGTH:
+            parameter.name = "Time";
+            parameter.symbol = "bufsiz";
+            parameter.unit = "ms";
+            parameter.ranges.def = 50;
+            parameter.ranges.min = 10;
+            parameter.ranges.max = 250;
             break;
 
+        case PARAM_BUF_COUNT:
+            parameter.hints = kParameterIsAutomable | kParameterIsInteger;
+            parameter.name = "Buffers";
+            parameter.symbol = "bufcount";
+            parameter.unit = "";
+            parameter.ranges.def = 4;
+            parameter.ranges.min = 2;
+            parameter.ranges.max = MAX_BUFFERS;
+            break;
+
+        case PARAM_CHARACTER:
+            parameter.name = "Repeat";
+            parameter.symbol = "repeats";
+            parameter.unit = "%";
+            parameter.ranges.def = 10;
+            parameter.ranges.min = 0;
+            parameter.ranges.max = 100;
+            break;
     }
 
 }
@@ -86,11 +106,18 @@ void AvocadoPlugin::initParameter(uint32_t index, Parameter& parameter) {
  */
 float AvocadoPlugin::getParameterValue(uint32_t index) const {
     switch (index) {
-        case PARAM_DRY_DB:
-            return dry_out_db_;
 
-        case PARAM_WET_DB:
-            return wet_out_db_;
+        case PARAM_MIX:
+            return 100.0 * mix_;
+
+        case PARAM_BUF_LENGTH:
+            return int(1000.0 * buffer_size_ / srate);
+
+        case PARAM_BUF_COUNT:
+            return buffer_count_;
+
+        case PARAM_CHARACTER:
+            return repeat_prob_;
 
         default:
             return 0;
@@ -105,20 +132,23 @@ float AvocadoPlugin::getParameterValue(uint32_t index) const {
 void AvocadoPlugin::setParameterValue(uint32_t index, float value) {
 
     switch (index) {
-        case PARAM_DRY_DB:
-            dry_out_db_ = value;
+
+        case PARAM_MIX:
+            mix_ = 0.01 * value;
             break;
 
-        case PARAM_WET_DB:
-            wet_out_db_ = value;
+        case PARAM_BUF_LENGTH:
+            buffer_size_ = value * srate / 1000.0;
             break;
 
+        case PARAM_BUF_COUNT:
+            buffer_count_ = value;
+            break;
+
+        case PARAM_CHARACTER:
+            repeat_prob_ = value;
+            break;
     }
-}
-
-float rand(float f) {
-    // TODO implement
-    return 0;
 }
 
 /**
@@ -138,20 +168,23 @@ void AvocadoPlugin::record(Channel& ch, const signal_t in) {
 
     /*
     record:
-      if rnd() > ?, start recording else stop recording.
+      if not recording and rnd() > ?, start recording else stop recording.
       if recording, add to buffer. if buffer full, stop recording.
      */
 
     if (is_recording_) {
         ch.buffer[record_buffer_][record_csr_] = in;
         record_csr_ += 1;
-        if (record_csr_ > bufsiz_) {
+        if (record_csr_ > buffer_size_) {
             // hit end of buffer
             is_recording_ = false;
         }
     } else {
         // start recording
-        record_buffer_ = (int) (rand(buffer_count_));
+        record_buffer_ = rand() % buffer_count_;
+        if (record_buffer_ == playback_buffer_) {
+            record_buffer_ = (record_buffer_ + 1) % buffer_count_;
+        }
         record_csr_ = 0;
         is_recording_ = true;
     }
@@ -164,17 +197,23 @@ signal_t AvocadoPlugin::playback(Channel& ch, const signal_t in) {
       if buffer ended, choose either same buffer or a new buffer
       play selected buffer
      */
-    if (playback_csr_ > bufsiz_) {
+    if (playback_csr_ > buffer_size_) {
         playback_csr_ = 0;
-        //
-        //        if (rand(100) > repeat_probability_) {
-        //            playback_buffer_ = (int) (rand(buffer_count_));
-        //        }
-        //
+
+        // character:
+        // [0,50] -> repeat last buffer
+        // [50, 100] -> fadeout
+
+        if (rand() % 100 > repeat_prob_) {
+            playback_buffer_ = rand() % buffer_count_;
+
+        }
+
         //        // fadeout block?
-        //        if (rand(100) > 105 - fadeout_probability_) {
-        //            for (int i = 0; i < bufsiz_; ++i) {
-        //                ch.buffer[max_bufsiz_ * playback_buffer_ + i] *= 0.85;
+        //        if (rand() % 100 > 2 * character_ - 100) {
+        //            for (int i = 0; i < buffer_size_; ++i) {
+        //                // TODO(dca): replace this with a per-buffer gain value
+        //                ch.buffer[playback_buffer_][i] *= 0.98;
         //            }
         //        }
     }
@@ -184,8 +223,8 @@ signal_t AvocadoPlugin::playback(Channel& ch, const signal_t in) {
 
     if (playback_csr_ < FADE_SAMPLES) {
         mult = (float) playback_csr_ / (float) FADE_SAMPLES;
-    } else if (playback_csr_ > bufsiz_ - FADE_SAMPLES) {
-        mult = (float) (bufsiz_ - playback_csr_ - 1) / (float) FADE_SAMPLES;
+    } else if (playback_csr_ > buffer_size_ - FADE_SAMPLES) {
+        mult = (float) (buffer_size_ - playback_csr_ - 1) / (float) FADE_SAMPLES;
     }
 
     // calculate raw output
@@ -197,42 +236,19 @@ signal_t AvocadoPlugin::playback(Channel& ch, const signal_t in) {
 }
 
 float AvocadoPlugin::gate(Channel& ch, const signal_t in) {
-    //    // gate
-    //    // calculate threshold - moving slightly to correct for input level
-    //    if (fabs(in) > thresh) {
-    //        thresh = thresh * 0.9 + 0.1 * fabs(in);
-    //    } else {
-    //        thresh = thresh * 0.98 + 0.02 * fabs(in);
-    //    }
-    //
-    //    if (thresh > fmax(threshold_ / 100.0, max_thresh_ * threshold_ / 65.0)) {
-    //        target_gain = 1;
-    //    } else {
-    //        target_gain = 1 - (mix_ / 100);
-    //    }
-    //    max_thresh = (thresh > max_thresh) ? max(max_thresh, max_thresh * 0.1 + thresh * 0.9) : max_thresh * 0.99998;
-    return 1.0;
+    // rectify and leaky integrate
+    leaky_integrator = fmin(leaky_integrator * leakage + fabs(in) * (1.0 - leakage), 1.0);
+    return leaky_integrator < threshold_ ? 1.0 : 0.0;
 }
 
 signal_t AvocadoPlugin::process(Channel& ch, const signal_t in) {
-
     record(ch, in);
     signal_t curr = playback(ch, in);
-    signal_t target_gain = gate(ch, in);
-    //
-    //    // output mix
-    //    if (target_gain > gain) {
-    //        gain = gain * 0.95 + 0.05 * target_gain;
-    //    } else {
-    //        gain = gain * (1 - attack_ / 100000) + attack_ / 100000 * target_gain;
-    //    }
-    //    last_gain = gain;
-
-    float gain = 0.5;
-
-    // output
-    in = in * gain + curr * (1 - gain);
+    float target_gain = gate(ch, in);
+    gain_ = gain_ * (1.0 - attack_) + target_gain * attack_;
+    return in + curr * gain_;
 }
+
 // Per-channel processing.
 
 Plugin * DISTRHO::createPlugin() {
