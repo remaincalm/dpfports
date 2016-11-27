@@ -39,7 +39,6 @@ void ParanoiaPlugin::initProgramName(uint32_t index, String& programName) {
 void ParanoiaPlugin::loadProgram(uint32_t index) {
     switch (index) {
         case 0:
-            setParameterValue(PARAM_DRY_DB, -96);
             setParameterValue(PARAM_WET_DB, -3);
             setParameterValue(PARAM_CRUSH, 95);
             setParameterValue(PARAM_THERMONUCLEAR_WAR, 0);
@@ -56,17 +55,8 @@ void ParanoiaPlugin::initParameter(uint32_t index, Parameter& parameter) {
     parameter.hints = kParameterIsAutomable;
 
     switch (index) {
-        case PARAM_DRY_DB:
-            parameter.name = "Dry Out";
-            parameter.symbol = "dry";
-            parameter.unit = "dB";
-            parameter.ranges.def = -96;
-            parameter.ranges.min = -96;
-            parameter.ranges.max = 6;
-            break;
-
         case PARAM_WET_DB:
-            parameter.name = "Wet Out";
+            parameter.name = "Level";
             parameter.symbol = "wet";
             parameter.unit = "dB";
             parameter.ranges.def = -3;
@@ -113,9 +103,6 @@ void ParanoiaPlugin::initParameter(uint32_t index, Parameter& parameter) {
  */
 float ParanoiaPlugin::getParameterValue(uint32_t index) const {
     switch (index) {
-        case PARAM_DRY_DB:
-            return dry_out_db_;
-
         case PARAM_WET_DB:
             return wet_out_db_;
 
@@ -141,10 +128,6 @@ float ParanoiaPlugin::getParameterValue(uint32_t index) const {
 void ParanoiaPlugin::setParameterValue(uint32_t index, float value) {
 
     switch (index) {
-        case PARAM_DRY_DB:
-            dry_out_db_ = value;
-            break;
-
         case PARAM_WET_DB:
             wet_out_db_ = value;
             break;
@@ -186,7 +169,7 @@ void ParanoiaPlugin::fixFilterParams() {
     // calc params from meta-param
     if (filter_ <= 80) {
         filter_mode_ = MODE_BANDPASS;
-        filter_res_ = 10 + ((int) filter_ / 20);
+        filter_res_ = 10 + (filter_ / 8.0);
     } else if (filter_ <= 99) {
         filter_res_ = 40.0;
         filter_gain_comp_ = 1;
@@ -234,7 +217,7 @@ signal_t ParanoiaPlugin::process(Channel& ch, const signal_t in) {
     curr = filter_gain_comp_ * DB_CO(wet_out_db_) * curr; // boost before post-saturate
     curr = postSaturate(curr);
     curr = ch.dc_filter.process(curr);
-    return DB_CO(dry_out_db_) * in + curr;
+    return curr;
 }
 
 signal_t ParanoiaPlugin::pregain(const Channel& ch, const signal_t in) const {

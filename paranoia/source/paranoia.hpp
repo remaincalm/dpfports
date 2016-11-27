@@ -178,7 +178,6 @@ public:
     };
 
     enum Parameters {
-        PARAM_DRY_DB,
         PARAM_WET_DB,
         PARAM_CRUSH,
         PARAM_THERMONUCLEAR_WAR,
@@ -336,7 +335,6 @@ private:
     // params    
     // gain
     const float gain_db_ = 6.0;
-    SmoothParam<float> dry_out_db_ = 0.4;
     SmoothParam<float> wet_out_db_ = 0.4;
 
     // filter
@@ -361,7 +359,6 @@ private:
     samples_t srate;
 
     void tick() {
-        dry_out_db_.tick();
         wet_out_db_.tick();
         resample_hz_.tick();
         per_sample_.tick();

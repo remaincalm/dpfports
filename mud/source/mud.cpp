@@ -136,16 +136,19 @@ void MudPlugin::fixFilterParams() {
     // LFO
     float lfo_depth = 0;
     if (lfo_ < 0) {
-        lfo_depth = 20;
+        lfo_depth = 20; // bigger on -ve side
     } else if (lfo_ > 0) {
         lfo_depth = 10;
     }
-    float lfo_rate = fabs(lfo_) * 0.00025;
+    float lfo_rate = fabs(lfo_) * 0.0002;
+    if (lfo_ < 0) { // faster on -ve side
+        lfo_rate *= 3.0;
+    }
     lfo_counter_ += 1;
 
     float new_filter = filter_ + lfo_depth * sin(lfo_rate * lfo_counter_);
     new_filter = fmin(fmax(new_filter, 0), 100); // clamp
-    new_filter = new_filter * 0.2 + prv_filter_ * 0.8;
+    new_filter = new_filter * 0.1 + prv_filter_ * 0.9; // LERP to new filter value
     prv_filter_ = new_filter;
 
     // calc params from meta-param
