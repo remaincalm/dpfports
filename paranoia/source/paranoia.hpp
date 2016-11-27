@@ -50,8 +50,10 @@ const int NUM_MANGLERS = 17;
 const int MANGLER_BITDEPTH = 8;
 
 // DC filter. Call process once per sample.
+
 class DcFilter {
 public:
+
     signal_t process(const signal_t in) {
         otm = 0.99 * otm + in - itm;
         itm = in;
@@ -63,6 +65,7 @@ private:
 };
 
 // Bitcrusher. 
+
 class Mangler {
 public:
 
@@ -184,7 +187,6 @@ public:
     };
 
     struct Channel {
-
         // filter state
         float v0 = 0;
         float v1 = 0;
@@ -195,7 +197,7 @@ public:
         samples_frac_t next_sample = 0;
         signal_t prev_in = 0;
         long sample_csr = 0;
-        
+
         // DC filter
         DcFilter dc_filter;
 
@@ -341,6 +343,7 @@ private:
     float filter_ = 0;
     float filter_cutoff_ = 0;
     float filter_res_ = 0;
+    SmoothParam<float> filter_gain_comp_ = 1.0;
     FilterMode filter_mode_ = MODE_BANDPASS;
 
     // resampler
@@ -362,6 +365,7 @@ private:
         wet_out_db_.tick();
         resample_hz_.tick();
         per_sample_.tick();
+        filter_gain_comp_.tick();
         bitscale_.tick();
         nuclear_.tick();
         lpf_.tick();

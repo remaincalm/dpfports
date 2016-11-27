@@ -59,7 +59,7 @@ private:
     T start = 0;
     T end = 0;
     int t = 0;
-    const int len = 2400; // ~50ms at 48kHz
+    int len = 128; // processing blocksize on mod duo
 };
 
 #endif

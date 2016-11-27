@@ -95,9 +95,9 @@ void FloatyPlugin::initParameter(uint32_t index, Parameter& parameter) {
             parameter.name = "Feedback";
             parameter.symbol = "feedback";
             parameter.unit = "%";
-            parameter.ranges.def = 20;
+            parameter.ranges.def = 15;
             parameter.ranges.min = 0;
-            parameter.ranges.max = 80;
+            parameter.ranges.max = 60;
             break;
 
         case PARAM_WARP:
@@ -113,7 +113,7 @@ void FloatyPlugin::initParameter(uint32_t index, Parameter& parameter) {
             parameter.name = "Filter";
             parameter.symbol = "filter";
             parameter.unit = "";
-            parameter.ranges.def = 60;
+            parameter.ranges.def = 50;
             parameter.ranges.min = 0;
             parameter.ranges.max = 100;
             break;
@@ -224,8 +224,10 @@ void FloatyPlugin::fixDelayParams() {
 }
 
 void FloatyPlugin::fixFilterParams() {
-    filter_res_ = 0.1 + filter_ * 0.6;
-    filter_cutoff_ = 50.0 + 45.0 * sin(filter_ / 10.0);
+
+    filter_res_ = 0.25 + filter_ * 0.5;
+    filter_cutoff_ = 45.0 + 40.0 * cos(filter_ / 12.0);
+    filter_gain_ = 2.2 - 1.2 * cos(filter_ / 12.0);
 
     lpf_.c = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
     float lr = powf(0.5, -0.6 + filter_res_ / 40.0);
@@ -243,12 +245,10 @@ void FloatyPlugin::run(const float** inputs, float** outputs, uint32_t frames) {
     // TODO(dca): right channel.
     const float* const input = inputs[0];
     /* */ float* const left_output = outputs[0];
-    /* */ float* const right_output = outputs[1];
 
     for (uint32_t i = 0; i < frames; ++i) {
         tick();
         left_output[i] = process(left_, input[i]);
-        right_output[i] = process(right_, input[i]);
     }
 }
 
@@ -258,7 +258,7 @@ signal_t FloatyPlugin::process(Channel& ch, const signal_t in) {
     signal_t curr = readFromPlayHead(ch);
     curr = fadeNearOverlap(ch, curr);
     curr = saturate(curr);
-    curr = bandpassFilter(ch, curr);
+    curr = filter_gain_ * bandpassFilter(ch, curr);
 
     // Write back to tape.
     ch.buf[ch.rec_csr] = in + curr * feedback_;
@@ -311,8 +311,7 @@ signal_t FloatyPlugin::readFromPlayHead(const Channel& ch) const {
 // Dampen value if play/rec cursor overlap to prevent clicks.
 
 signal_t FloatyPlugin::fadeNearOverlap(const Channel& ch, signal_t in) const {
-    samples_frac_t overlap_dist = fabs(
-            (fmod(ch.play_csr, ch.getModPoint())) - (float) (ch.rec_csr % ch.getModPoint()));
+    samples_frac_t overlap_dist = fabs((fmod(ch.play_csr, ch.getModPoint())) - (float) (ch.rec_csr % ch.getModPoint()));
     float overlap_mult = (overlap_dist >= SMOOTH_OVERLAP) ? 1.0 : (overlap_dist / SMOOTH_OVERLAP);
     return in * overlap_mult;
 }
@@ -325,7 +324,7 @@ void FloatyPlugin::advanceRecHead(Channel& ch) {
 
 signal_t FloatyPlugin::saturate(const signal_t in) const {
     float shaper_amt = 3.0f - 0.8f * in;
-    return fmax(-CLAMP, fmin(CLAMP, CLAMP * ((1 + shaper_amt) * in) / (1 + (shaper_amt * fabs(in)))));
+    return fmax(-CLAMP, fmin(CLAMP, CLAMP * ((1.0 + shaper_amt) * in) / (1.0 + (shaper_amt * fabs(in)))));
 }
 
 // Applies a bandpass filter to the current sample.

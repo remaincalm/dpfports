@@ -22,8 +22,8 @@
 #ifndef DISTRHO_PLUGIN_INFO_H_INCLUDED
 #define DISTRHO_PLUGIN_INFO_H_INCLUDED
 
-#define DISTRHO_PLUGIN_NAME "sub"
-#define DISTRHO_PLUGIN_URI  "http://remaincalm.org/plugins/sub"
+#define DISTRHO_PLUGIN_NAME "mud"
+#define DISTRHO_PLUGIN_URI  "http://remaincalm.org/plugins/mud"
 
 #define DISTRHO_PLUGIN_IS_RT_SAFE    1
 #define DISTRHO_PLUGIN_NUM_INPUTS    1
@@ -31,6 +31,6 @@
 #define DISTRHO_PLUGIN_WANT_PROGRAMS 1
 
 
-#define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:SpectralPlugin"
+#define DISTRHO_PLUGIN_LV2_CATEGORY "lv2:FilterPlugin"
 
 #endif // DISTRHO_PLUGIN_INFO_H_INCLUDED

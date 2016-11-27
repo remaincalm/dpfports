@@ -65,7 +65,6 @@ public:
 
         Channel() {
             setDelay(1000);
-            rec_csr = 0;
         }
 
         void setDelay(samples_t delay) {
@@ -87,9 +86,9 @@ public:
         }
 
         // tape state
-        samples_t delay;
-        samples_t rec_csr;
-        samples_frac_t play_csr;
+        samples_t delay = 1;
+        samples_t rec_csr = 0;
+        samples_frac_t play_csr = 0;
 
         // tape buffer
         signal_t buf[MAX_BUF] = {};
@@ -225,26 +224,28 @@ private:
     samples_t delay_ = (int) (120.0 * 48000.0 / 1000.0);
     SmoothParam<float> mix_ = 0.4;
     SmoothParam<float> feedback_ = 0.2;
-    
+
     float warp_ = 49;
-    
+
     float warp_rate_hz_ = 0.1;
     float warp_rate_rad_ = 2.0 * PI * 0.1 / 48000.0;
     SmoothParam<float> warp_amount_ = 0.01;
-    
+
     float filter_ = 25;
+    SmoothParam<float> filter_gain_ = 1.0;
     float filter_cutoff_ = 60;
     float filter_res_ = 40;
     SmoothParam<samples_frac_t> playback_rate_ = 1.0;
     float channel_offset_ = 98.0;
     float warp_counter_ = 0; // this will probably lose resolution and go weird
 
-    samples_t srate;
+    samples_t srate = 48000;
 
     void tick() {
         mix_.tick();
         feedback_.tick();
         warp_amount_.tick();
+        filter_gain_.tick();
         playback_rate_.tick();
         left_.tick();
         right_.tick();

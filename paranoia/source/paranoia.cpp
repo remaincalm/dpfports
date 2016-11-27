@@ -178,19 +178,23 @@ void ParanoiaPlugin::fixCrushParams() {
 }
 
 void ParanoiaPlugin::fixFilterParams() {
+    // cutoff shape is \/\/
+    // need to compensate for filter gain
+    filter_cutoff_ = 20.0 + fabs(fabs(160.0 - 3.2 * filter_) - 80.0);
+    filter_gain_comp_ = 3.0 - fabs(fabs(160.0 - 3.2 * filter_) - 80.0) / 40.0;
+
     // calc params from meta-param
     if (filter_ <= 80) {
         filter_mode_ = MODE_BANDPASS;
         filter_res_ = 10 + ((int) filter_ / 20);
     } else if (filter_ <= 99) {
         filter_res_ = 40.0;
+        filter_gain_comp_ = 1;
         filter_mode_ = MODE_HPF;
     } else {
+        filter_gain_comp_ = 1;
         filter_mode_ = MODE_OFF;
     }
-
-    // cutoff shape is \/\/
-    filter_cutoff_ = 10.0 + fabs(fabs(160.0 - 3.2 * filter_) - 80.0);
 
     // set up R/C constants
     lpf_.c = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
@@ -227,7 +231,7 @@ signal_t ParanoiaPlugin::process(Channel& ch, const signal_t in) {
     if (filter_mode_ == MODE_HPF || filter_mode_ == MODE_BANDPASS) {
         curr = filterHPF(ch, curr);
     }
-    curr = DB_CO(wet_out_db_) * curr; // boost before post-saturate
+    curr = filter_gain_comp_ * DB_CO(wet_out_db_) * curr; // boost before post-saturate
     curr = postSaturate(curr);
     curr = ch.dc_filter.process(curr);
     return DB_CO(dry_out_db_) * in + curr;
@@ -274,7 +278,6 @@ signal_t ParanoiaPlugin::bitcrush(const signal_t in) const {
     float gain_r = mangler_.relgain(nuclear_r);
     float gain = gain_l * (1.0 - mix) + gain_r * mix;
     return curr * gain;
-    ;
 }
 
 signal_t ParanoiaPlugin::preSaturate(const signal_t in) const {

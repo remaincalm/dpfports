@@ -24,8 +24,8 @@
 // the channel should own its own processing.
 
 
-#ifndef SUB_HPP
-#define SUB_HPP
+#ifndef MUD_HPP
+#define MUD_HPP
 
 #include "DistrhoPlugin.hpp"
 #include "util.hpp"
@@ -37,8 +37,6 @@ typedef float signal_t; // signal value
 
 const float PI = 3.141592653589793;
 
-const samples_t RESAMPLE_MAX = 48000;
-
 // waveshapes
 const float PRE_SHAPER = 0.857;
 const float POST_SHAPER = 0.9;
@@ -46,12 +44,11 @@ const float CLAMP = 0.9;
 
 const int NUM_PROGRAMS = 1;
 
-const int NUM_MANGLERS = 17;
-const int MANGLER_BITDEPTH = 8;
-
 // DC filter. Call process once per sample.
+
 class DcFilter {
 public:
+
     signal_t process(const signal_t in) {
         otm = 0.99 * otm + in - itm;
         itm = in;
@@ -62,17 +59,18 @@ private:
     signal_t itm = 0;
 };
 
-class SubPlugin : public Plugin {
+class MudPlugin : public Plugin {
 public:
 
     enum Parameters {
-        PARAM_DRY_DB,
-        PARAM_WET_DB,
+        PARAM_MIX,
         PARAM_FILTER,
+        PARAM_LFO,
         PARAM_COUNT
     };
 
     struct Channel {
+    public:
 
         // filter state
         float v0 = 0;
@@ -102,7 +100,7 @@ public:
       Plugin class constructor.
       You must set all parameter values to their defaults, matching the value in initParameter().
      */
-    SubPlugin() : Plugin(PARAM_COUNT, NUM_PROGRAMS, 0) {
+    MudPlugin() : Plugin(PARAM_COUNT, NUM_PROGRAMS, 0) {
         srate = getSampleRate();
         loadProgram(0);
     };
@@ -122,7 +120,7 @@ protected:
       This label is a short restricted name consisting of only _, a-z, A-Z and 0-9 characters.
      */
     const char* getLabel() const noexcept override {
-        return "Sub";
+        return "Mud";
     }
 
     /**
@@ -130,7 +128,7 @@ protected:
       Optional, returns nothing by default.
      */
     const char* getDescription() const noexcept override {
-        return "Sub polyphonic octave.";
+        return "Mud filter";
     }
 
     /**
@@ -162,7 +160,7 @@ protected:
       @see d_cconst()
      */
     int64_t getUniqueId() const noexcept override {
-        return d_cconst('r', 'c', 'O', 'c');
+        return d_cconst('r', 'c', 'M', 'u');
     }
 
     // -------------------------------------------------------------------
@@ -199,6 +197,7 @@ protected:
 
 private:
     void fixFilterParams();
+    void fixLfoParams();
 
     signal_t pregain(const Channel& ch, const signal_t in) const;
     signal_t preSaturate(const signal_t in) const;
@@ -214,25 +213,30 @@ private:
 
     // params    
     // gain
-    const float gain_db_ = 6.0;
-    SmoothParam<float> dry_out_db_ = 0.4;
-    SmoothParam<float> wet_out_db_ = 0.4;
+    const float gain_db_ = 3.0;
+    SmoothParam<float> mix_ = 1.0;
+
+    // LFO
+    float lfo_ = 0;
+    long lfo_counter_ = 0;
+    float prv_filter_ = 0;
 
     // filter
     float filter_ = 0;
     float filter_cutoff_ = 0;
     float filter_res_ = 0;
+    SmoothParam<float> filter_gain_comp_ = 1.0;
 
     // 
     samples_t srate;
 
     void tick() {
-        dry_out_db_.tick();
-        wet_out_db_.tick();
+        mix_.tick();
         lpf_.tick();
         hpf_.tick();
         left_.tick();
+        filter_gain_comp_.tick();
     }
 };
 
-#endif // SUB_HPP
+#endif // MUD_HPP

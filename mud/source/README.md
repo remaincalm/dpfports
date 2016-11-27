@@ -1,3 +1,3 @@
-== SUB OCTAVE ==
+== MUD OCTAVE ==
 
 TODO: write text
