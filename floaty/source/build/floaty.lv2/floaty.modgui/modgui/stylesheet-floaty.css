@@ -52,18 +52,15 @@
     position:absolute;
     right:0;
     text-align:center;
-    text-transform:uppercase;
+    text-transform:lowercase;
     top:160px;
 }
 
 .mod-pedal-boxy{{{cns}}} .mod-plugin-brand h1 {
-    border-color:#000;
-    border-radius:12px;
-    border-style:solid;
-    border-width:4px;
+    border-style:none;
     display:inline-block;
     font-family:"Nexa";
-    font-size:32px;
+    font-size:28px;
     padding:3px 9px 0;
 }
 
