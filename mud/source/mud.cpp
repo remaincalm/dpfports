@@ -183,7 +183,7 @@ void MudPlugin::run(const float** inputs, float** outputs, uint32_t frames) {
 }
 
 signal_t MudPlugin::process(Channel& ch, const signal_t in) {
-    signal_t curr = preSaturate(curr);
+    signal_t curr = preSaturate(in);
     curr = filterLPF(ch, curr);
     curr = filterHPF(ch, curr);
     curr = postSaturate(curr);
