@@ -42,7 +42,6 @@ class AvocadoPlugin : public Plugin {
 public:
 
     enum Parameters {
-        PARAM_MIX,
         PARAM_BUF_LENGTH,
         PARAM_BUF_COUNT,
         PARAM_CHARACTER,
@@ -170,8 +169,6 @@ private:
     Channel left_;
 
     // params    
-    // gain
-    SmoothParam<float> mix_ = 0.4;
 
     // glitcher
     int buffer_count_ = 4;
@@ -196,7 +193,6 @@ private:
     samples_t srate;
 
     void tick() {
-        mix_.tick();
         left_.tick();
     }
 };

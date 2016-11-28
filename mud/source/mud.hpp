@@ -199,7 +199,6 @@ private:
     void fixFilterParams();
     void fixLfoParams();
 
-    signal_t pregain(const Channel& ch, const signal_t in) const;
     signal_t preSaturate(const signal_t in) const;
     signal_t postSaturate(const signal_t in) const;
     signal_t filterDC(Channel& ch, const signal_t in) const;
@@ -213,7 +212,6 @@ private:
 
     // params    
     // gain
-    const float gain_db_ = 3.0;
     SmoothParam<float> mix_ = 1.0;
 
     // LFO

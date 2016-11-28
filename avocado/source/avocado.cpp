@@ -40,7 +40,6 @@ void AvocadoPlugin::initProgramName(uint32_t index, String& programName) {
 void AvocadoPlugin::loadProgram(uint32_t index) {
     switch (index) {
         case 0:
-            setParameterValue(PARAM_MIX, 50);
             setParameterValue(PARAM_BUF_LENGTH, 45);
             setParameterValue(PARAM_BUF_COUNT, 4);
             setParameterValue(PARAM_CHARACTER, 20);
@@ -56,15 +55,6 @@ void AvocadoPlugin::initParameter(uint32_t index, Parameter& parameter) {
     parameter.hints = kParameterIsAutomable;
 
     switch (index) {
-
-        case PARAM_MIX:
-            parameter.name = "Mix";
-            parameter.symbol = "mix";
-            parameter.unit = "%";
-            parameter.ranges.def = 40;
-            parameter.ranges.min = 0;
-            parameter.ranges.max = 100;
-            break;
 
         case PARAM_BUF_LENGTH:
             parameter.name = "Time";
@@ -107,9 +97,6 @@ void AvocadoPlugin::initParameter(uint32_t index, Parameter& parameter) {
 float AvocadoPlugin::getParameterValue(uint32_t index) const {
     switch (index) {
 
-        case PARAM_MIX:
-            return 100.0 * mix_;
-
         case PARAM_BUF_LENGTH:
             return int(1000.0 * buffer_size_ / srate);
 
@@ -132,10 +119,6 @@ float AvocadoPlugin::getParameterValue(uint32_t index) const {
 void AvocadoPlugin::setParameterValue(uint32_t index, float value) {
 
     switch (index) {
-
-        case PARAM_MIX:
-            mix_ = 0.01 * value;
-            break;
 
         case PARAM_BUF_LENGTH:
             buffer_size_ = value * srate / 1000.0;

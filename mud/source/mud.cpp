@@ -183,8 +183,7 @@ void MudPlugin::run(const float** inputs, float** outputs, uint32_t frames) {
 }
 
 signal_t MudPlugin::process(Channel& ch, const signal_t in) {
-    signal_t curr = pregain(ch, in);
-    curr = preSaturate(curr);
+    signal_t curr = preSaturate(curr);
     curr = filterLPF(ch, curr);
     curr = filterHPF(ch, curr);
     curr = postSaturate(curr);
@@ -197,10 +196,6 @@ signal_t MudPlugin::process(Channel& ch, const signal_t in) {
         // wet full vol, fade out dry
         return curr + 2.0 * (1.0 - mix_) * in;
     }
-}
-
-signal_t MudPlugin::pregain(const Channel& ch, const signal_t in) const {
-    return DB_CO(gain_db_) * in;
 }
 
 signal_t MudPlugin::preSaturate(const signal_t in) const {
