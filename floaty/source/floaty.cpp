@@ -60,7 +60,7 @@ void FloatyPlugin::loadProgram(uint32_t index) {
             setParameterValue(PARAM_MIX, 50);
             setParameterValue(PARAM_FEEDBACK, 20);
             setParameterValue(PARAM_WARP, 40);
-            setParameterValue(PARAM_FILTER, 37.5);
+            setParameterValue(PARAM_FILTER, 15);
             setParameterValue(PARAM_PLAYBACK_RATE, 1.0);
             break;
     }
@@ -186,7 +186,7 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
                 warp_rate_hz_ = 3.0;
             }
             warp_rate_rad_ = 2.0 * PI * warp_rate_hz_ / srate;
-            warp_amount_ = 0.01 * fabs(2.0 - 0.04 * value);
+            warp_amount_ = 0.008 * fabs(2.0 - 0.04 * value);
             break;
 
         case PARAM_FILTER:
@@ -195,11 +195,9 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
             break;
 
         case PARAM_PLAYBACK_RATE:
-            // fix to steps 0.5 increments
-            // acceptable values:
-            // [-2, -1.5, -1, -0.5, 0.5, 1, 1.5, 2]
-            value = ((int) (2 * value)) / 2.0;
-            if (value == 0) {
+            // fix to steps 0.25 increments
+            value = ((int) (4 * value)) / 4.0;
+            if (fabs(value) < 0.5) {
                 value = 1;
             }
             playback_rate_ = value;
@@ -285,7 +283,7 @@ void FloatyPlugin::advancePlayHead(Channel& ch) {
     // wanting to stay away from the overlap region etc.
     // also need to use internal delay value, not channel delay, so that
     // L and R have the same limit.
-    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2) * warp_rate_hz_ / 20000.0;
+    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2) * warp_rate_hz_ / 24000.0;
     samples_frac_t warp = fmin(max_warp_amount, warp_amount_) * sin(warp_counter_);
     ch.play_csr += warp;
     warp_counter_ += warp_rate_rad_;
