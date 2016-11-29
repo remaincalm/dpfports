@@ -36,7 +36,7 @@ const samples_t MAX_BUF = 48000 * 1.2; // 1.2 seconds at 48kHz
 const samples_frac_t SMOOTH_OVERLAP = 128.0f; // Smooth out if rec/play csr overlap.
 const signal_t CLAMP = 0.6;
 
-const int NUM_PROGRAMS = 1;
+const int NUM_PROGRAMS = 6;
 
 class FloatyPlugin : public Plugin {
 public:

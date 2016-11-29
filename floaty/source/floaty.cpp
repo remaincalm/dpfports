@@ -48,21 +48,44 @@ So, it's good fun.
 void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
         case 0:
-            programName = "Floaty Default";
+            programName = "Default";
             break;
+        case 1:
+            programName = "Slap";
+            break;
+        case 2:
+            programName = "Dream";
+            break;
+        case 3:
+            programName = "Chorus";
+            break;
+        case 4:
+            programName = "Octave";
+            break;
+        case 5:
+            programName = "Melt";
+            break;
+
     }
 }
 
 void FloatyPlugin::loadProgram(uint32_t index) {
-    switch (index) {
-        case 0:
-            setParameterValue(PARAM_DELAY_MS, 300);
-            setParameterValue(PARAM_MIX, 50);
-            setParameterValue(PARAM_FEEDBACK, 20);
-            setParameterValue(PARAM_WARP, 40);
-            setParameterValue(PARAM_FILTER, 15);
-            setParameterValue(PARAM_PLAYBACK_RATE, 1.0);
-            break;
+    const float params[][6] = {
+        {330, 30, 20, 25, 14, 1},
+        {60, 50, 0, 45, 60, 1},
+        {350, 40, 20, 65, 53, -1},
+        {30, 50, 10, 40, 20, 1},
+        {600, 25, 10, 35, 70, -2},
+        {260, 20, 5, 15, 60, 1.5},
+    };
+
+    if (index < 6) {
+        setParameterValue(PARAM_DELAY_MS, params[index][0]);
+        setParameterValue(PARAM_MIX, params[index][1]);
+        setParameterValue(PARAM_FEEDBACK, params[index][2]);
+        setParameterValue(PARAM_WARP, params[index][3]);
+        setParameterValue(PARAM_FILTER, params[index][4]);
+        setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
     }
 }
 
@@ -102,7 +125,7 @@ void FloatyPlugin::initParameter(uint32_t index, Parameter& parameter) {
 
         case PARAM_WARP:
             parameter.name = "Warp";
-            parameter.symbol = "";
+            parameter.symbol = "warp";
             parameter.unit = "";
             parameter.ranges.def = 48;
             parameter.ranges.min = 0;
@@ -186,7 +209,7 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
                 warp_rate_hz_ = 3.0;
             }
             warp_rate_rad_ = 2.0 * PI * warp_rate_hz_ / srate;
-            warp_amount_ = 0.008 * fabs(2.0 - 0.04 * value);
+            warp_amount_ = 0.01 * fabs(2.0 - 0.04 * value);
             break;
 
         case PARAM_FILTER:
@@ -283,7 +306,7 @@ void FloatyPlugin::advancePlayHead(Channel& ch) {
     // wanting to stay away from the overlap region etc.
     // also need to use internal delay value, not channel delay, so that
     // L and R have the same limit.
-    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2) * warp_rate_hz_ / 24000.0;
+    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2.0) * warp_rate_hz_ / 22000.0;
     samples_frac_t warp = fmin(max_warp_amount, warp_amount_) * sin(warp_counter_);
     ch.play_csr += warp;
     warp_counter_ += warp_rate_rad_;

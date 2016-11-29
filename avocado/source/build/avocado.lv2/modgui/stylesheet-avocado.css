@@ -48,12 +48,13 @@
 /* = PLUGIN'S AUTHOR
 ================================================ */
 .mod-pedal-boxy{{{cns}}} .mod-plugin-brand {
-    left:0;
-    position:absolute;
-    right:0;
-    text-align:center;
-    text-transform:lowercase;
-    top:160px;
+    position: absolute;
+    right: 16px;
+    text-align: right;
+    text-transform: lowercase;
+    top: 340px;
+    opacity: 0.4;
+    filter: blur(2px);
 }
 
 .mod-pedal-boxy{{{cns}}} .mod-plugin-brand h1 {
@@ -62,13 +63,6 @@
     font-family:"Nexa";
     font-size:28px;
     padding:3px 9px 0;
-}
-
-.mod-pedal-boxy{{{cns}}}.mod-five-knobs .mod-plugin-brand,
-.mod-pedal-boxy{{{cns}}}.mod-six-knobs .mod-plugin-brand,
-.mod-pedal-boxy{{{cns}}}.mod-seven-knobs .mod-plugin-brand,
-.mod-pedal-boxy{{{cns}}}.mod-eight-knobs .mod-plugin-brand {
-    top:190px;
 }
 
 .mod-pedal-boxy{{{cns}}}.mod-boxy50 .mod-plugin-brand {
@@ -88,7 +82,8 @@
     position:absolute;
     right:30px;
     text-align:center;
-    top:340px;
+    top:150px;
+    opacity: 0.8;
 }
 
 .mod-pedal-boxy{{{cns}}} .mod-plugin-name h1 {

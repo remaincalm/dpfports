@@ -28,7 +28,7 @@
             lv2:name "Feedback" ;
         ] , [
             lv2:index 3 ;
-            lv2:symbol "lv2_port_4" ;
+            lv2:symbol "warp" ;
             lv2:name "Warp" ;
         ] , [
             lv2:index 4 ;
