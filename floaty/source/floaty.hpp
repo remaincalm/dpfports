@@ -135,7 +135,14 @@ protected:
       Optional, returns nothing by default.
      */
     const char* getDescription() const noexcept override {
-        return "Floaty delay.";
+        return "Floaty modulation/delay\n"
+        "\n"
+        "Time: delay time\n"
+        "Mix: direct/processed mix\n"
+        "Feedback: feedback (can go into oscillation!)\n"
+        "Warp: modulation - left side is mellow, right side is fast\n"
+        "Filter: bandpass frequency/resonance\n"
+        "Rate: playback speed, cycles from -200% to 200% speed (unity in middle)";
     }
 
     /**

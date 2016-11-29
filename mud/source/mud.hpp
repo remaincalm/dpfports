@@ -129,7 +129,12 @@ protected:
       Optional, returns nothing by default.
      */
     const char* getDescription() const noexcept override {
-        return "Mud filter";
+        return
+        "Mud modulation/filter\n"
+        "\n"
+        "Mix: direct/processed mix\n"
+        "Filter: bandpass frequency/resonance\n"
+        "LFO: speed/depth - left side is deep, right side is mellow";
     }
 
     /**

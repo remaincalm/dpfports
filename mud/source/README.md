@@ -1,3 +1,3 @@
-== MUD OCTAVE ==
+== MUD Filter ==
 
 TODO: write text
