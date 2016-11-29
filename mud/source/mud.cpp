@@ -31,19 +31,47 @@ Mud is a filter, overdrive and octave down.
 void MudPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
         case 0:
-            programName = "Mud Default";
+            programName = "Beef";
+            break;
+        case 1:
+            programName = "Sweep";
+            break;
+        case 2:
+            programName = "Sweep2";
+            break;
+        case 3:
+            programName = "Vibe";
+            break;
+        case 4:
+            programName = "Megavibe";
+            break;
+        case 5:
+            programName = "BPF";
             break;
     }
 }
 
 void MudPlugin::loadProgram(uint32_t index) {
-    switch (index) {
-        case 0:
-            setParameterValue(PARAM_MIX, 100);
-            setParameterValue(PARAM_FILTER, 45);
-            setParameterValue(PARAM_LFO, 0);
-            break;
+
+    const float params[][3] = {
+        {50, 50, 0},
+        {100, 30, 7},
+        {70, 90, -3},
+        {40, 80, 60},
+        {100, 15, -40},
+        {100, 75, 0},
+    };
+
+    if (index < 6) {
+        setParameterValue(PARAM_MIX, params[index][0]);
+        setParameterValue(PARAM_FILTER, params[index][1]);
+        setParameterValue(PARAM_LFO, params[index][2]);
+
+        // HACK(dca): params are ready back for UI immediately following
+        // program load, param smoothing breaks this.
+        mix_.complete();
     }
+
 }
 
 /**

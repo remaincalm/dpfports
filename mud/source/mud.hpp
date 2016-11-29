@@ -38,11 +38,11 @@ typedef float signal_t; // signal value
 const float PI = 3.141592653589793;
 
 // waveshapes
-const float PRE_SHAPER = 0.857;
+const float PRE_SHAPER = 0.4;
 const float POST_SHAPER = 0.9;
-const float CLAMP = 0.9;
+const float CLAMP = 0.98;
 
-const int NUM_PROGRAMS = 1;
+const int NUM_PROGRAMS = 6;
 
 // DC filter. Call process once per sample.
 
@@ -54,6 +54,7 @@ public:
         itm = in;
         return otm;
     }
+
 private:
     signal_t otm = 0;
     signal_t itm = 0;
@@ -210,7 +211,7 @@ private:
     Filter lpf_;
     Filter hpf_;
 
-    // params    
+    // params
     // gain
     SmoothParam<float> mix_ = 1.0;
 
@@ -225,7 +226,7 @@ private:
     float filter_res_ = 0;
     SmoothParam<float> filter_gain_comp_ = 1.0;
 
-    // 
+    //
     samples_t srate;
 
     void tick() {

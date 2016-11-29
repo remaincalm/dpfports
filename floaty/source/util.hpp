@@ -40,6 +40,11 @@ public:
         return *this;
     }
 
+    void complete() {
+        t = len;
+        value = end;
+    }
+
     operator T() const {
         return value;
     }

@@ -182,7 +182,7 @@ protected:
     //
     void fixFilterParams();
 
-    // 
+    //
     void fixDelayParams();
 
     // -------------------------------------------------------------------
@@ -220,6 +220,8 @@ private:
     Filter lpf_;
     Filter hpf_;
 
+    // TODO move user-specified params into a class, wrap in getters/setters
+    // and move logic out of FloatyPlugin.
     // params
     samples_t delay_ = (int) (120.0 * 48000.0 / 1000.0);
     SmoothParam<float> mix_ = 0.4;
@@ -237,7 +239,7 @@ private:
     float filter_res_ = 40;
     SmoothParam<samples_frac_t> playback_rate_ = 1.0;
     float channel_offset_ = 98.0;
-    float warp_counter_ = 0; // this will probably lose resolution and go weird
+    double warp_counter_ = 0; // this will probably lose resolution and go weird
 
     samples_t srate = 48000;
 

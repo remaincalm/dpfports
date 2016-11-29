@@ -57,7 +57,7 @@ void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
             programName = "Dream";
             break;
         case 3:
-            programName = "Chorus";
+            programName = "Dub";
             break;
         case 4:
             programName = "Octave";
@@ -71,10 +71,10 @@ void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
 
 void FloatyPlugin::loadProgram(uint32_t index) {
     const float params[][6] = {
-        {330, 30, 20, 25, 14, 1},
+        {330, 47, 20, 90, 19, 1},
         {60, 50, 0, 45, 60, 1},
-        {350, 40, 20, 65, 53, -1},
-        {30, 50, 10, 40, 20, 1},
+        {350, 40, 20, 35, 53, -1},
+        {500, 30, 15, 40, 55, 1},
         {600, 25, 10, 35, 70, -2},
         {260, 20, 5, 15, 60, 1.5},
     };
@@ -86,6 +86,12 @@ void FloatyPlugin::loadProgram(uint32_t index) {
         setParameterValue(PARAM_WARP, params[index][3]);
         setParameterValue(PARAM_FILTER, params[index][4]);
         setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
+
+        // HACK(dca): params are ready back for UI immediately following
+        // program load, param smoothing breaks this.
+        mix_.complete();
+        feedback_.complete();
+        playback_rate_.complete();
     }
 }
 
@@ -163,7 +169,7 @@ void FloatyPlugin::initParameter(uint32_t index, Parameter& parameter) {
 float FloatyPlugin::getParameterValue(uint32_t index) const {
     switch (index) {
         case PARAM_DELAY_MS:
-            return 1000.0 * (float) left_.delay / srate;
+            return 1000.0 * (float) delay_ / srate;
         case PARAM_MIX:
             return 100.0 * mix_;
         case PARAM_FEEDBACK:
@@ -306,7 +312,7 @@ void FloatyPlugin::advancePlayHead(Channel& ch) {
     // wanting to stay away from the overlap region etc.
     // also need to use internal delay value, not channel delay, so that
     // L and R have the same limit.
-    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2.0) * warp_rate_hz_ / 22000.0;
+    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2.0) * warp_rate_hz_ / 24000.0;
     samples_frac_t warp = fmin(max_warp_amount, warp_amount_) * sin(warp_counter_);
     ch.play_csr += warp;
     warp_counter_ += warp_rate_rad_;

@@ -44,6 +44,11 @@ public:
         return value;
     }
 
+    void complete() {
+        t = len;
+        value = end;
+    }
+
     void tick() {
         if (t < len) {
             t += 1;
