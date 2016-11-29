@@ -29,17 +29,13 @@
 
 #include "DistrhoPlugin.hpp"
 #include "util.hpp"
-#include "math.h"
 
 typedef int samples_t; // integral sample length or position
-typedef float samples_frac_t; // fractional sample length or position
 typedef float signal_t; // signal value
-
-const float PI = 3.141592653589793;
 
 // waveshapes
 const float PRE_SHAPER = 0.4;
-const float POST_SHAPER = 0.9;
+const float POST_SHAPER = 0.8;
 const float CLAMP = 0.98;
 
 const int NUM_PROGRAMS = 6;

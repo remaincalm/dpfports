@@ -26,7 +26,6 @@ Mud is a filter, overdrive and octave down.
 
 #include "DistrhoPlugin.hpp"
 #include "mud.hpp"
-#include "math.h"
 
 void MudPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
@@ -55,8 +54,8 @@ void MudPlugin::loadProgram(uint32_t index) {
 
     const float params[][3] = {
         {50, 50, 0},
-        {100, 30, 7},
-        {70, 90, -3},
+        {90, 80, 20},
+        {70, 90, -13},
         {40, 80, 60},
         {100, 15, -40},
         {100, 75, 0},
@@ -100,7 +99,6 @@ void MudPlugin::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.min = 0;
             parameter.ranges.max = 100;
             break;
-
 
         case PARAM_LFO:
             parameter.name = "LFO";
@@ -161,14 +159,14 @@ void MudPlugin::setParameterValue(uint32_t index, float value) {
 }
 
 void MudPlugin::fixFilterParams() {
-    // LFO
+    // LFO - deadzone from [-10,10]
     float lfo_depth = 0;
-    if (lfo_ < 0) {
+    if (lfo_ < -10) {
         lfo_depth = 20; // bigger on -ve side
-    } else if (lfo_ > 0) {
+    } else if (lfo_ > 10) {
         lfo_depth = 10;
     }
-    float lfo_rate = fabs(lfo_) * 0.0002;
+    float lfo_rate = fmax(fabs(lfo_) - 10.0, 0) * 0.0002;
     if (lfo_ < 0) { // faster on -ve side
         lfo_rate *= 3.0;
     }
