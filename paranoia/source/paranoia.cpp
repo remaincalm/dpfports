@@ -38,12 +38,12 @@ void ParanoiaPlugin::initProgramName(uint32_t index, String& programName) {
 void ParanoiaPlugin::loadProgram(uint32_t index) {
 
     const float params[][4] = {
-        {0, 100, 0, 40},
-        {0, 65, 0.5, 12.5},
-        {0, 0, 13.25, 60.94},
-        {0, 45, 3.75, 30},
-        {0, 90, 11, 34.4},
-        {6, 53.13, 12.50, 54.69}
+        {-9, 100, 0, 40},
+        {-3, 65, 0.5, 12.5},
+        {-2, 0, 13.25, 60.94},
+        {-1, 45, 3.75, 30},
+        {-1, 90, 11, 34.4},
+        {-5, 53.13, 12.50, 54.69}
     };
 
     if (index < 6) {
@@ -55,7 +55,6 @@ void ParanoiaPlugin::loadProgram(uint32_t index) {
         // HACK(dca): params are ready back for UI immediately following
         // program load, param smoothing breaks this.
         wet_out_db_.complete();
-        resample_hz_.complete();
         nuclear_.complete();
     }
 }
@@ -165,11 +164,11 @@ void ParanoiaPlugin::fixCrushParams() {
     if (crush_ > 99.0) {
         resample_hz_ = srate;
     } else if (crush_ > 50) {
-        resample_hz_ = 300.0 + (crush_ - 50.0)*600.0;
+        resample_hz_ = 300.0 + (crush_ - 50.0) * 600.0;
     } else {
         resample_hz_ = 300.0 + (50.0 - crush_) * 600.0;
     }
-    per_sample_ = srate / (float) resample_hz_;
+    per_sample_ = (float) srate / (float) resample_hz_;
     bitscale_ = pow(2, bitdepth_ - 1) - 0.5;
 }
 

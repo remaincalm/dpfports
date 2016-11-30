@@ -324,7 +324,7 @@ private:
 
     // resampler
     float crush_ = 95;
-    SmoothParam<float> resample_hz_ = 33000;
+    samples_t resample_hz_ = 33000;
     SmoothParam<float> per_sample_ = 2;
 
     // bitcrusher
@@ -338,7 +338,6 @@ private:
 
     void tick() {
         wet_out_db_.tick();
-        resample_hz_.tick();
         per_sample_.tick();
         filter_gain_comp_.tick();
         bitscale_.tick();

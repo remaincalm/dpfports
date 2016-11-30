@@ -82,7 +82,7 @@ public:
         // tape state
         samples_t delay = 1;
         samples_t rec_csr = 0;
-        samples_frac_t play_csr = 0;
+        double play_csr = 0;
 
         // tape buffer
         signal_t buf[MAX_BUF] = {};

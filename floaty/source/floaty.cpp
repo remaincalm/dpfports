@@ -224,8 +224,8 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
             break;
 
         case PARAM_PLAYBACK_RATE:
-            // fix to steps 0.25 increments
-            value = ((int) (4 * value)) / 4.0;
+            // fix to steps 0.125 increments
+            value = ((int) (8 * value)) / 8.0;
             if (fabs(value) < 0.5) {
                 value = 1;
             }
@@ -307,19 +307,13 @@ void FloatyPlugin::advancePlayHead(Channel& ch) {
     ch.play_csr += playback_rate_;
 
     // clamp warp_amount_ to prevent overruns.
-    // magic number chosen analytically, plus some buffer. i think there's a
-    // better formula that has pi/2 in it somewhere but we need extra due to
-    // wanting to stay away from the overlap region etc.
-    // also need to use internal delay value, not channel delay, so that
-    // L and R have the same limit.
-    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP * 2.0) * warp_rate_hz_ / 24000.0;
-    samples_frac_t warp = fmin(max_warp_amount, warp_amount_) * sin(warp_counter_);
+    // magic number chosen experimentally.
+    float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP) * warp_rate_hz_ / 16000.0;
+    double warp = fmin(max_warp_amount, warp_amount_) * sin(warp_counter_);
     ch.play_csr += warp;
     warp_counter_ += warp_rate_rad_;
-
     ch.play_csr = fmod(ch.play_csr + (samples_frac_t) ch.getModPoint(), ch.getModPoint());
 }
-
 
 // Sets sample to the current value under playhead.
 
