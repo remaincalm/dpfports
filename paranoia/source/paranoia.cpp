@@ -29,7 +29,7 @@ Paranoia is a bit crusher, distortion, resampler and mangler.
 #include "math.h"
 
 void ParanoiaPlugin::initProgramName(uint32_t index, String& programName) {
-    static const char* names[] = {"grit", "more grit", "gated fuzz", "lofi", "invert", "wolfcpu"};
+    static const char* names[] = {"grit", "more grit", "gated fuzz", "lofi", "invert", "lupine"};
     if (index < 6) {
         programName = names[index];
     }
@@ -43,7 +43,7 @@ void ParanoiaPlugin::loadProgram(uint32_t index) {
         {-2, 0, 13.25, 60.94},
         {-1, 45, 3.75, 30},
         {-1, 90, 11, 34.4},
-        {-5, 53.13, 12.50, 54.69}
+        {-9, 53.13, 12.50, 54.69}
     };
 
     if (index < 6) {
@@ -56,6 +56,9 @@ void ParanoiaPlugin::loadProgram(uint32_t index) {
         // program load, param smoothing breaks this.
         wet_out_db_.complete();
         nuclear_.complete();
+        per_sample_.complete();
+        filter_gain_comp_.complete();
+        bitscale_.complete();
     }
 }
 
