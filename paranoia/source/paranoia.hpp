@@ -31,11 +31,6 @@
 #include "util.hpp"
 #include "math.h"
 
-typedef int samples_t; // integral sample length or position
-typedef float samples_frac_t; // fractional sample length or position
-typedef float signal_t; // signal value
-
-const float PI = 3.141592653589793;
 
 const samples_t RESAMPLE_MAX = 48000;
 
@@ -49,20 +44,6 @@ const int NUM_PROGRAMS = 6;
 const int NUM_MANGLERS = 17;
 const int MANGLER_BITDEPTH = 8;
 
-// DC filter. Call process once per sample.
-
-class DcFilter {
-public:
-
-    signal_t process(const signal_t in) {
-        otm = 0.99 * otm + in - itm;
-        itm = in;
-        return otm;
-    }
-private:
-    signal_t otm = 0;
-    signal_t itm = 0;
-};
 
 // Bitcrusher.
 
@@ -200,9 +181,6 @@ public:
         // DC filter
         DcFilter dc_filter;
 
-        void tick() {
-            //
-        }
     };
 
     struct Filter {
@@ -367,7 +345,6 @@ private:
         nuclear_.tick();
         lpf_.tick();
         hpf_.tick();
-        left_.tick();
     }
 };
 
