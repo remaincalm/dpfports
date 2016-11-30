@@ -46,19 +46,19 @@ public:
     SmoothParam(T init) : value(init), start(init), end(init) {
     }
 
-    SmoothParam<T>& operator=(T f) {
+    SmoothParam<T, U>& operator=(T f) {
         start = value;
         end = f;
         t = 0;
         return *this;
     }
 
-    SmoothParam<T>& operator+=(T f) {
+    SmoothParam<T, U>& operator+=(T f) {
         this->operator=(end + f);
         return *this;
     }
 
-    SmoothParam<T>& operator-=(T f) {
+    SmoothParam<T, U>& operator-=(T f) {
         this->operator=(end - f);
         return *this;
     }

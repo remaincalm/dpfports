@@ -30,8 +30,6 @@
 #include "DistrhoPlugin.hpp"
 #include "util.hpp"
 
-typedef int samples_t; // integral sample length or position
-typedef float signal_t; // signal value
 
 // waveshapes
 const float PRE_SHAPER = 0.4;
@@ -39,22 +37,6 @@ const float POST_SHAPER = 0.8;
 const float CLAMP = 0.98;
 
 const int NUM_PROGRAMS = 6;
-
-// DC filter. Call process once per sample.
-
-class DcFilter {
-public:
-
-    signal_t process(const signal_t in) {
-        otm = 0.99 * otm + in - itm;
-        itm = in;
-        return otm;
-    }
-
-private:
-    signal_t otm = 0;
-    signal_t itm = 0;
-};
 
 class MudPlugin : public Plugin {
 public:
@@ -84,8 +66,8 @@ public:
     };
 
     struct Filter {
-        SmoothParam<float> c = 0.3;
-        SmoothParam<float> one_minus_rc = 0.98;
+        SmoothParam<float, 128> c = 0.3;
+        SmoothParam<float, 128> one_minus_rc = 0.98;
 
         void tick() {
             c.tick();
@@ -225,7 +207,7 @@ private:
     float filter_ = 0;
     float filter_cutoff_ = 0;
     float filter_res_ = 0;
-    SmoothParam<float> filter_gain_comp_ = 1.0;
+    SmoothParam<float, 128> filter_gain_comp_ = 1.0;
 
     //
     samples_t srate;

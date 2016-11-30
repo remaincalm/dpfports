@@ -24,14 +24,8 @@
 
 #include "DistrhoPlugin.hpp"
 #include "math.h"
-
 #include "util.hpp"
 
-typedef int samples_t; // integral sample length or position
-typedef float samples_frac_t; // fractional sample length or position
-typedef float signal_t; // signal value
-
-const float PI = 3.141592653589793;
 const samples_t MAX_BUF = 48000 * 1.2; // 1.2 seconds at 48kHz
 const samples_frac_t SMOOTH_OVERLAP = 128.0f; // Smooth out if rec/play csr overlap.
 const signal_t CLAMP = 0.6;
@@ -99,9 +93,6 @@ public:
         float hv0 = 0;
         float hv1 = 0;
 
-        void tick() {
-            //
-        }
     };
 
     /**
@@ -244,7 +235,7 @@ private:
     SmoothParam<float> filter_gain_ = 1.0;
     float filter_cutoff_ = 60;
     float filter_res_ = 40;
-    SmoothParam<samples_frac_t> playback_rate_ = 1.0;
+    SmoothParam<samples_frac_t, 9600> playback_rate_ = 1.0;
     float channel_offset_ = 98.0;
     double warp_counter_ = 0; // this will probably lose resolution and go weird
 
@@ -256,8 +247,6 @@ private:
         warp_amount_.tick();
         filter_gain_.tick();
         playback_rate_.tick();
-        left_.tick();
-        right_.tick();
         lpf_.tick();
         hpf_.tick();
     }

@@ -26,10 +26,6 @@
 #include "util.hpp"
 #include "math.h"
 
-typedef int samples_t; // integral sample length or position
-typedef float samples_frac_t; // fractional sample length or position
-typedef float signal_t; // signal value
-
 const int NUM_PROGRAMS = 1;
 
 class MswitchPlugin : public Plugin {

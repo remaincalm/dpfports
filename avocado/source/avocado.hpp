@@ -26,11 +26,6 @@
 #include "util.hpp"
 #include "math.h"
 
-typedef int samples_t; // integral sample length or position
-typedef float samples_frac_t; // fractional sample length or position
-typedef float signal_t; // signal value
-
-const float PI = 3.141592653589793;
 
 const int MAX_BUFLEN = 48000 * 4.0; // 4 sec
 const int MAX_BUFFERS = 8;
@@ -168,7 +163,7 @@ private:
 
     Channel left_;
 
-    // params    
+    // params
 
     // glitcher
     int buffer_count_ = 4;
@@ -189,7 +184,7 @@ private:
     const float attack_ = 0.005;
     float gain_ = 0;
 
-    // 
+    //
     samples_t srate;
 
     void tick() {

@@ -210,12 +210,12 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
         case PARAM_WARP:
             warp_ = value;
             if (warp_ <= 50) {
-                warp_rate_hz_ = 0.08;
+                warp_rate_hz_ = 0.1;
             } else {
-                warp_rate_hz_ = 3.0;
+                warp_rate_hz_ = 3.5;
             }
-            warp_rate_rad_ = 2.0 * PI * warp_rate_hz_ / srate;
-            warp_amount_ = 0.01 * fabs(2.0 - 0.04 * value);
+            warp_rate_rad_ = 2.0 * PI * warp_rate_hz_ / (float) srate;
+            warp_amount_ = 0.012 * fabs(2.0 - 0.04 * value);
             break;
 
         case PARAM_FILTER:
