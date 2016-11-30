@@ -47,12 +47,10 @@ void MudPlugin::loadProgram(uint32_t index) {
 
     if (index < 6) {
         setParameterValue(PARAM_MIX, params[index][0]);
+        mix_.complete();
+
         setParameterValue(PARAM_FILTER, params[index][1]);
         setParameterValue(PARAM_LFO, params[index][2]);
-
-        // HACK(dca): params are ready back for UI immediately following
-        // program load, param smoothing breaks this.
-        mix_.complete();
     }
 
 }

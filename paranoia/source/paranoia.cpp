@@ -48,17 +48,14 @@ void ParanoiaPlugin::loadProgram(uint32_t index) {
 
     if (index < 6) {
         setParameterValue(PARAM_WET_DB, params[index][0]);
-        setParameterValue(PARAM_CRUSH, params[index][1]);
-        setParameterValue(PARAM_THERMONUCLEAR_WAR, params[index][2]);
-        setParameterValue(PARAM_FILTER, params[index][3]);
-
-        // HACK(dca): params are ready back for UI immediately following
-        // program load, param smoothing breaks this.
         wet_out_db_.complete();
+
+        setParameterValue(PARAM_CRUSH, params[index][1]);
+
+        setParameterValue(PARAM_THERMONUCLEAR_WAR, params[index][2]);
         nuclear_.complete();
-        per_sample_.complete();
-        filter_gain_comp_.complete();
-        bitscale_.complete();
+
+        setParameterValue(PARAM_FILTER, params[index][3]);
     }
 }
 

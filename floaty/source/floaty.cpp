@@ -82,15 +82,14 @@ void FloatyPlugin::loadProgram(uint32_t index) {
     if (index < 6) {
         setParameterValue(PARAM_DELAY_MS, params[index][0]);
         setParameterValue(PARAM_MIX, params[index][1]);
+        mix_.complete();
+
         setParameterValue(PARAM_FEEDBACK, params[index][2]);
+        feedback_.complete();
+
         setParameterValue(PARAM_WARP, params[index][3]);
         setParameterValue(PARAM_FILTER, params[index][4]);
         setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
-
-        // HACK(dca): params are ready back for UI immediately following
-        // program load, param smoothing breaks this.
-        mix_.complete();
-        feedback_.complete();
         playback_rate_.complete();
     }
 }
