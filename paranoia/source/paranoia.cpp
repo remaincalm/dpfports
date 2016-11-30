@@ -29,21 +29,34 @@ Paranoia is a bit crusher, distortion, resampler and mangler.
 #include "math.h"
 
 void ParanoiaPlugin::initProgramName(uint32_t index, String& programName) {
-    switch (index) {
-        case 0:
-            programName = "Paranoia Default";
-            break;
+    static const char* names[] = {"grit", "more grit", "gated fuzz", "lofi", "invert", "wolfcpu"};
+    if (index < 6) {
+        programName = names[index];
     }
 }
 
 void ParanoiaPlugin::loadProgram(uint32_t index) {
-    switch (index) {
-        case 0:
-            setParameterValue(PARAM_WET_DB, -3);
-            setParameterValue(PARAM_CRUSH, 95);
-            setParameterValue(PARAM_THERMONUCLEAR_WAR, 0);
-            setParameterValue(PARAM_FILTER, 45);
-            break;
+
+    const float params[][4] = {
+        {0, 100, 0, 40},
+        {0, 65, 0.5, 12.5},
+        {0, 0, 13.25, 60.94},
+        {0, 45, 3.75, 30},
+        {0, 90, 11, 34.4},
+        {6, 53.13, 12.50, 54.69}
+    };
+
+    if (index < 6) {
+        setParameterValue(PARAM_WET_DB, params[index][0]);
+        setParameterValue(PARAM_CRUSH, params[index][1]);
+        setParameterValue(PARAM_THERMONUCLEAR_WAR, params[index][2]);
+        setParameterValue(PARAM_FILTER, params[index][3]);
+
+        // HACK(dca): params are ready back for UI immediately following
+        // program load, param smoothing breaks this.
+        wet_out_db_.complete();
+        resample_hz_.complete();
+        nuclear_.complete();
     }
 }
 

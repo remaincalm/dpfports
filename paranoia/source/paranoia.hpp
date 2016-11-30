@@ -44,7 +44,7 @@ const float PRE_SHAPER = 0.857;
 const float POST_SHAPER = 0.9;
 const float CLAMP = 0.9;
 
-const int NUM_PROGRAMS = 1;
+const int NUM_PROGRAMS = 6;
 
 const int NUM_MANGLERS = 17;
 const int MANGLER_BITDEPTH = 8;
@@ -64,7 +64,7 @@ private:
     signal_t itm = 0;
 };
 
-// Bitcrusher. 
+// Bitcrusher.
 
 class Mangler {
 public:
@@ -332,7 +332,7 @@ private:
     Filter lpf_;
     Filter hpf_;
 
-    // params    
+    // params
     // gain
     const float gain_db_ = 6.0;
     SmoothParam<float> wet_out_db_ = 0.4;
@@ -355,7 +355,7 @@ private:
     SmoothParam<float> nuclear_ = 0;
     Mangler mangler_;
 
-    // 
+    //
     samples_t srate;
 
     void tick() {

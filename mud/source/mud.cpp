@@ -28,25 +28,9 @@ Mud is a filter, overdrive and octave down.
 #include "mud.hpp"
 
 void MudPlugin::initProgramName(uint32_t index, String& programName) {
-    switch (index) {
-        case 0:
-            programName = "Beef";
-            break;
-        case 1:
-            programName = "Sweep";
-            break;
-        case 2:
-            programName = "Sweep2";
-            break;
-        case 3:
-            programName = "Vibe";
-            break;
-        case 4:
-            programName = "Megavibe";
-            break;
-        case 5:
-            programName = "BPF";
-            break;
+    static const char* names[] = {"beef", "sweep", "sweep 2", "vibe", "megavibe", "honk"};
+    if (index < 6) {
+        programName = names[index];
     }
 }
 
@@ -56,7 +40,7 @@ void MudPlugin::loadProgram(uint32_t index) {
         {50, 50, 0},
         {90, 80, 20},
         {70, 90, -13},
-        {40, 80, 60},
+        {65, 80, 85},
         {100, 15, -40},
         {100, 75, 0},
     };
