@@ -86,7 +86,7 @@ void ParanoiaPlugin::initParameter(uint32_t index, Parameter& parameter) {
             break;
 
         case PARAM_THERMONUCLEAR_WAR:
-            parameter.name = "Thermonuclear War";
+            parameter.name = "Mangle";
             parameter.symbol = "nuclear";
             parameter.unit = "";
             parameter.ranges.def = 0;

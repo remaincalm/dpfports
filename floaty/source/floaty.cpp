@@ -71,12 +71,12 @@ void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
 
 void FloatyPlugin::loadProgram(uint32_t index) {
     const float params[][6] = {
-        {330, 47, 20, 90, 19, 1},
+        {330, 47, 20, 60, 19, 1},
         {60, 50, 0, 45, 60, 1},
-        {350, 40, 20, 35, 53, -1},
+        {350, 30, 15, 35, 53, -1},
         {500, 30, 15, 40, 55, 1},
-        {600, 25, 10, 35, 70, -2},
-        {260, 20, 5, 15, 60, 1.5},
+        {600, 10, 10, 35, 70, -2},
+        {260, 10, 5, 15, 60, 1.5},
     };
 
     if (index < 6) {

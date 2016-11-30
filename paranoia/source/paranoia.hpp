@@ -225,7 +225,12 @@ protected:
       Optional, returns nothing by default.
      */
     const char* getDescription() const noexcept override {
-        return "Paranoia distortion/mangler.";
+        return "Paranoia digital distortion/mangler.\n"
+        "\n"
+        "Level: post-saturation gain\n"
+        "Crush: left 300Hz-30kHz 6-bit, right 300Hz-30kHz 10-bit, far-right 48kHz 10-bit\n"
+        "Mangle: Sweep through bit flip/mute patterns (interactive w/ crush)\n"
+        "Filter: 0-80 bandpass, 80-99 highpass, 100 raw";
     }
 
     /**
@@ -268,8 +273,6 @@ protected:
       This function will be called once, shortly after the plugin is created.
      */
     void initParameter(uint32_t index, Parameter& parameter) override;
-
-
 
     // -------------------------------------------------------------------
     // Internal data
