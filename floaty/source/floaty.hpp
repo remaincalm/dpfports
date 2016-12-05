@@ -70,6 +70,9 @@ public:
                 memset(buf, 0, MAX_BUF * sizeof (signal_t));
             }
 
+            // TODO - this should set a tape speed (maybe a level up)
+            // and everything should just speed up to get to roughly this
+            // value.
             this->delay = delay;
             play_csr = 0;
             rec_csr = getModPoint() - delay;
@@ -233,8 +236,6 @@ private:
 
     float filter_ = 25;
     SmoothParam<float> filter_gain_ = 1.0;
-    float filter_cutoff_ = 60;
-    float filter_res_ = 40;
     SmoothParam<samples_frac_t, 9600> playback_rate_ = 1.0;
     float channel_offset_ = 98.0;
     double warp_counter_ = 0; // this will probably lose resolution and go weird

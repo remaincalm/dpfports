@@ -80,26 +80,20 @@ void FloatyPlugin::loadProgram(uint32_t index) {
     };
 
     if (index < 6) {
-        // fix up warp and playback val while setting other params
-        setParameterValue(PARAM_WARP, 50);
-        warp_amount_.complete();
-        setParameterValue(PARAM_PLAYBACK_RATE, 1.0);
-        playback_rate_.complete();
-
         setParameterValue(PARAM_FEEDBACK, params[index][2]);
         feedback_.complete();
-
+        setParameterValue(PARAM_MIX, params[index][1]);
+        mix_.complete();
         setParameterValue(PARAM_FILTER, params[index][4]);
+
         setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
         playback_rate_.complete();
 
-        setParameterValue(PARAM_DELAY_MS, params[index][0]);
         setParameterValue(PARAM_WARP, params[index][3]);
         warp_amount_.complete();
         warp_counter_ = 0;
 
-        setParameterValue(PARAM_MIX, params[index][1]);
-        mix_.complete();
+        setParameterValue(PARAM_DELAY_MS, params[index][0]);
     }
 }
 
@@ -250,9 +244,8 @@ void FloatyPlugin::fixDelayParams() {
 }
 
 void FloatyPlugin::fixFilterParams() {
-
-    filter_res_ = 0.25 + filter_ * 0.5;
-    filter_cutoff_ = 45.0 + 40.0 * cos(filter_ / 12.0);
+    float filter_res_ = 0.25 + filter_ * 0.5;
+    float filter_cutoff_ = 45.0 + 40.0 * cos(filter_ / 12.0);
     filter_gain_ = 2.2 - 1.2 * cos(filter_ / 12.0);
 
     float lc = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
