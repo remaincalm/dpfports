@@ -51,32 +51,31 @@ void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
             programName = "Default";
             break;
         case 1:
-            programName = "Slap";
-            break;
-        case 2:
             programName = "Dream";
             break;
-        case 3:
+        case 2:
             programName = "Dub";
             break;
-        case 4:
+        case 3:
             programName = "Octave";
             break;
-        case 5:
+        case 4:
             programName = "Melt";
             break;
-
+        case 5:
+            programName = "Slap";
+            break;
     }
 }
 
 void FloatyPlugin::loadProgram(uint32_t index) {
     const float params[][6] = {
         {280, 42, 20, 60, 19, 1},
-        {60, 45, 0, 45, 60, 1},
         {350, 25, 15, 35, 53, -1},
-        {500, 25, 15, 40, 55, 1},
+        {430, 25, 17, 40, 90, 1},
         {600, 13, 10, 35, 70, -2},
         {260, 13, 5, 15, 60, 1.5},
+        {90, 45, 0, 45, 60, 1},
     };
 
     if (index < 6) {
@@ -86,12 +85,11 @@ void FloatyPlugin::loadProgram(uint32_t index) {
         mix_.complete();
         setParameterValue(PARAM_FILTER, params[index][4]);
 
-        setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
-        playback_rate_.complete();
-
         setParameterValue(PARAM_WARP, params[index][3]);
         warp_amount_.complete();
-        warp_counter_ = 0;
+
+        setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
+        playback_rate_.complete();
 
         setParameterValue(PARAM_DELAY_MS, params[index][0]);
     }
@@ -241,6 +239,7 @@ void FloatyPlugin::fixDelayParams() {
     left_.setDelay(delay_);
     right_.setDelay(delay_ + lr_offset);
     warp_counter_ = 0;
+    playback_rate_.complete();
 }
 
 void FloatyPlugin::fixFilterParams() {
