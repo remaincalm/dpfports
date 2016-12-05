@@ -38,11 +38,11 @@ void MudPlugin::loadProgram(uint32_t index) {
 
     const float params[][3] = {
         {50, 50, 0},
-        {90, 80, 20},
+        {90, 87, 20},
         {70, 90, -13},
-        {65, 80, 85},
+        {65, 80, 100},
         {100, 15, -40},
-        {100, 75, 0},
+        {100, 67, 0},
     };
 
     if (index < 6) {
@@ -165,13 +165,15 @@ void MudPlugin::fixFilterParams() {
     filter_gain_comp_ = 3.0 - fabs(fabs(160.0 - 3.2 * new_filter) - 80.0) / 40.0;
 
     // set up R/C constants
-    lpf_.c = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
+    float lc = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
+    lpf_.c = lc;
     float lr = powf(0.5, -0.6 + filter_res_ / 40.0);
-    lpf_.one_minus_rc = 1.0 - (lr * lpf_.c);
+    lpf_.one_minus_rc = 1.0 - (lr * lc);
 
-    hpf_.c = powf(0.5, 4.6 + (filter_cutoff_ / 34.8));
+    float hc = powf(0.5, 4.6 + (filter_cutoff_ / 34.8));
+    hpf_.c = hc;
     float hr = powf(0.5, 3.0 - (filter_res_ / 63.5));
-    hpf_.one_minus_rc = 1.0 - (hr * hpf_.c);
+    hpf_.one_minus_rc = 1.0 - (hr * hc);
 }
 
 /**

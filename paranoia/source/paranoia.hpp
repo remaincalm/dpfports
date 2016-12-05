@@ -315,7 +315,7 @@ private:
 
     // params
     // gain
-    const float gain_db_ = 6.0;
+    const float gain_db_ = 6.0; // currently unused
     SmoothParam<float> wet_out_db_ = 0.4;
 
     // filter

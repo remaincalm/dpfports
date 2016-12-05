@@ -47,15 +47,21 @@ void ParanoiaPlugin::loadProgram(uint32_t index) {
     };
 
     if (index < 6) {
+        left_.sample_csr = 0;
+        left_.next_sample = 0;
+
+        setParameterValue(PARAM_THERMONUCLEAR_WAR, params[index][2]);
+        bitscale_.complete();
+        nuclear_.complete();
+
+        setParameterValue(PARAM_CRUSH, params[index][1]);
+        per_sample_.complete();
+
         setParameterValue(PARAM_WET_DB, params[index][0]);
         wet_out_db_.complete();
 
-        setParameterValue(PARAM_CRUSH, params[index][1]);
-
-        setParameterValue(PARAM_THERMONUCLEAR_WAR, params[index][2]);
-        nuclear_.complete();
-
         setParameterValue(PARAM_FILTER, params[index][3]);
+        filter_gain_comp_.complete();
     }
 }
 
@@ -192,13 +198,15 @@ void ParanoiaPlugin::fixFilterParams() {
     }
 
     // set up R/C constants
-    lpf_.c = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
+    float lc = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
+    lpf_.c = lc;
     float lr = powf(0.5, -0.6 + filter_res_ / 40.0);
-    lpf_.one_minus_rc = 1.0 - (lr * lpf_.c);
+    lpf_.one_minus_rc = 1.0 - (lr * lc);
 
-    hpf_.c = powf(0.5, 4.6 + (filter_cutoff_ / 34.8));
+    float hc = powf(0.5, 4.6 + (filter_cutoff_ / 34.8));
+    hpf_.c = hc;
     float hr = powf(0.5, 3.0 - (filter_res_ / 43.5));
-    hpf_.one_minus_rc = 1.0 - (hr * hpf_.c);
+    hpf_.one_minus_rc = 1.0 - (hr * hc);
 }
 
 /**
@@ -215,7 +223,7 @@ void ParanoiaPlugin::run(const float** inputs, float** outputs, uint32_t frames)
 }
 
 signal_t ParanoiaPlugin::process(Channel& ch, const signal_t in) {
-    signal_t curr = pregain(ch, in);
+    signal_t curr = in; // pregain(ch, in);
     curr = resample(ch, curr);
     curr = preSaturate(curr);
     curr = bitcrush(curr);

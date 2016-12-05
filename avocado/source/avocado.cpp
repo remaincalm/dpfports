@@ -32,7 +32,7 @@ Avocado is a bit crusher, distortion, resampler and mangler.
 void AvocadoPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
         case 0:
-            programName = "Avocado Default";
+            programName = "Default";
             break;
     }
 }
@@ -40,9 +40,7 @@ void AvocadoPlugin::initProgramName(uint32_t index, String& programName) {
 void AvocadoPlugin::loadProgram(uint32_t index) {
     switch (index) {
         case 0:
-            setParameterValue(PARAM_BUF_LENGTH, 45);
-            setParameterValue(PARAM_BUF_COUNT, 4);
-            setParameterValue(PARAM_CHARACTER, 20);
+            setParameterValue(PARAM_BUF_LENGTH, 70);
             break;
     }
 }
@@ -64,25 +62,6 @@ void AvocadoPlugin::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.min = 10;
             parameter.ranges.max = 250;
             break;
-
-        case PARAM_BUF_COUNT:
-            parameter.hints = kParameterIsAutomable | kParameterIsInteger;
-            parameter.name = "Buffers";
-            parameter.symbol = "bufcount";
-            parameter.unit = "";
-            parameter.ranges.def = 4;
-            parameter.ranges.min = 2;
-            parameter.ranges.max = MAX_BUFFERS;
-            break;
-
-        case PARAM_CHARACTER:
-            parameter.name = "Repeat";
-            parameter.symbol = "repeats";
-            parameter.unit = "%";
-            parameter.ranges.def = 10;
-            parameter.ranges.min = 0;
-            parameter.ranges.max = 100;
-            break;
     }
 
 }
@@ -99,12 +78,6 @@ float AvocadoPlugin::getParameterValue(uint32_t index) const {
 
         case PARAM_BUF_LENGTH:
             return int(1000.0 * buffer_size_ / srate);
-
-        case PARAM_BUF_COUNT:
-            return buffer_count_;
-
-        case PARAM_CHARACTER:
-            return repeat_prob_;
 
         default:
             return 0;
@@ -124,13 +97,6 @@ void AvocadoPlugin::setParameterValue(uint32_t index, float value) {
             buffer_size_ = value * srate / 1000.0;
             break;
 
-        case PARAM_BUF_COUNT:
-            buffer_count_ = value;
-            break;
-
-        case PARAM_CHARACTER:
-            repeat_prob_ = value;
-            break;
     }
 }
 
@@ -183,22 +149,10 @@ signal_t AvocadoPlugin::playback(Channel& ch, const signal_t in) {
     if (playback_csr_ > buffer_size_) {
         playback_csr_ = 0;
 
-        // character:
-        // [0,50] -> repeat last buffer
-        // [50, 100] -> fadeout
-
         if (rand() % 100 > repeat_prob_) {
             playback_buffer_ = rand() % buffer_count_;
 
         }
-
-        //        // fadeout block?
-        //        if (rand() % 100 > 2 * character_ - 100) {
-        //            for (int i = 0; i < buffer_size_; ++i) {
-        //                // TODO(dca): replace this with a per-buffer gain value
-        //                ch.buffer[playback_buffer_][i] *= 0.98;
-        //            }
-        //        }
     }
 
     // fade edges

@@ -71,26 +71,35 @@ void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
 
 void FloatyPlugin::loadProgram(uint32_t index) {
     const float params[][6] = {
-        {330, 47, 20, 60, 19, 1},
-        {60, 50, 0, 45, 60, 1},
-        {350, 30, 15, 35, 53, -1},
-        {500, 30, 15, 40, 55, 1},
-        {600, 10, 10, 35, 70, -2},
-        {260, 10, 5, 15, 60, 1.5},
+        {280, 42, 20, 60, 19, 1},
+        {60, 45, 0, 45, 60, 1},
+        {350, 25, 15, 35, 53, -1},
+        {500, 25, 15, 40, 55, 1},
+        {600, 13, 10, 35, 70, -2},
+        {260, 13, 5, 15, 60, 1.5},
     };
 
     if (index < 6) {
-        setParameterValue(PARAM_DELAY_MS, params[index][0]);
-        setParameterValue(PARAM_MIX, params[index][1]);
-        mix_.complete();
+        // fix up warp and playback val while setting other params
+        setParameterValue(PARAM_WARP, 50);
+        warp_amount_.complete();
+        setParameterValue(PARAM_PLAYBACK_RATE, 1.0);
+        playback_rate_.complete();
 
         setParameterValue(PARAM_FEEDBACK, params[index][2]);
         feedback_.complete();
 
-        setParameterValue(PARAM_WARP, params[index][3]);
         setParameterValue(PARAM_FILTER, params[index][4]);
         setParameterValue(PARAM_PLAYBACK_RATE, params[index][5]);
         playback_rate_.complete();
+
+        setParameterValue(PARAM_DELAY_MS, params[index][0]);
+        setParameterValue(PARAM_WARP, params[index][3]);
+        warp_amount_.complete();
+        warp_counter_ = 0;
+
+        setParameterValue(PARAM_MIX, params[index][1]);
+        mix_.complete();
     }
 }
 
@@ -190,12 +199,11 @@ float FloatyPlugin::getParameterValue(uint32_t index) const {
   When a parameter is marked as automable, you must ensure no non-realtime operations are performed.
  */
 void FloatyPlugin::setParameterValue(uint32_t index, float value) {
-    bool filter_changed = false;
-    bool delay_changed = false;
+
     switch (index) {
         case PARAM_DELAY_MS:
             delay_ = value * srate / 1000.0;
-            delay_changed = true;
+            fixDelayParams();
             break;
 
         case PARAM_MIX:
@@ -219,26 +227,18 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
 
         case PARAM_FILTER:
             filter_ = value;
-            filter_changed = true;
+            fixFilterParams();
             break;
 
         case PARAM_PLAYBACK_RATE:
             // fix to steps 0.125 increments
             value = ((int) (8 * value)) / 8.0;
+            // deadzone around zero -> 1
             if (fabs(value) < 0.5) {
-                value = 1;
+                value = 1.0;
             }
             playback_rate_ = value;
             break;
-    }
-
-    // RC filter params (hi/lo) - selected by magic
-    if (filter_changed) {
-        fixFilterParams();
-    }
-
-    if (delay_changed) {
-        fixDelayParams();
     }
 }
 
@@ -255,13 +255,15 @@ void FloatyPlugin::fixFilterParams() {
     filter_cutoff_ = 45.0 + 40.0 * cos(filter_ / 12.0);
     filter_gain_ = 2.2 - 1.2 * cos(filter_ / 12.0);
 
-    lpf_.c = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
+    float lc = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
+    lpf_.c = lc;
     float lr = powf(0.5, -0.6 + filter_res_ / 40.0);
-    lpf_.one_minus_rc = 1.0 - (lr * lpf_.c);
+    lpf_.one_minus_rc = 1.0 - (lr * lc);
 
-    hpf_.c = powf(0.5, 4.1 + (filter_cutoff_ / 200.0));
+    float hc = powf(0.5, 4.1 + (filter_cutoff_ / 200.0));
+    hpf_.c = hc;
     float hr = powf(0.5, 1 + filter_res_ / 200.0);
-    hpf_.one_minus_rc = 1.0 - (hr * hpf_.c);
+    hpf_.one_minus_rc = 1.0 - (hr * hc);
 }
 
 /**

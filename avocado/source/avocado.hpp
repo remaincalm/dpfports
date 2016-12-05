@@ -38,8 +38,6 @@ public:
 
     enum Parameters {
         PARAM_BUF_LENGTH,
-        PARAM_BUF_COUNT,
-        PARAM_CHARACTER,
         PARAM_COUNT
     };
 
@@ -166,7 +164,7 @@ private:
     // params
 
     // glitcher
-    int buffer_count_ = 4;
+    int buffer_count_ = 5;
     int buffer_size_ = 2048;
     int record_csr_ = 0;
     int record_buffer_ = 0;
@@ -175,7 +173,7 @@ private:
     bool is_recording_ = false;
 
     // params
-    SmoothParam<float> repeat_prob_ = 20;
+    SmoothParam<float> repeat_prob_ = 50;
 
     // gate
     signal_t leaky_integrator = 0;
