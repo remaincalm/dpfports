@@ -10,7 +10,7 @@ FLOATY_SITE = $($(PKG)_PKGDIR)/
 
 # even though this is a local build, we still need a version number
 # bump this number if you need to force a rebuild
-FLOATY_VERSION = 5
+FLOATY_VERSION = 6
 
 # dependencies (list of other buildroot packages, separated by space)
 # on this package we need to depend on the host version of ourselves to be able to run the ttl generator

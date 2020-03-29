@@ -45,6 +45,14 @@ So, it's good fun.
 #include "math.h"
 #include "util.hpp"
 
+namespace {
+
+    // https://forum.moddevices.com/t/revert-to-version-1-8-4-or-earlier-moduo-x/4209/12
+    // Snap delay time to nearest 5ms.
+    const samples_t DELAY_SNAP_SPLS = 5 * /* srate */ 48000 / 1000;
+
+}
+
 void FloatyPlugin::initProgramName(uint32_t index, String& programName) {
     switch (index) {
         case 0:
@@ -194,8 +202,14 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
 
     switch (index) {
         case PARAM_DELAY_MS:
-            delay_ = value * srate / 1000.0;
-            fixDelayParams();
+            samples_t target_delay = value * srate / 1000.0;
+
+            // Snap to nearest 5ms to prevent delay re-initing on tempo jitter.
+            target_delay -= target_delay % DELAY_SNAP_SPLS;
+            if (delay_ != target_delay) {
+                delay_ = target_delay;
+                fixDelayParams();
+            }
             break;
 
         case PARAM_MIX:
@@ -214,7 +228,7 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
                 warp_rate_hz_ = 3.5;
             }
             warp_rate_rad_ = 2.0 * PI * warp_rate_hz_ / (float) srate;
-            warp_amount_ = 0.012 * fabs(2.0 - 0.04 * value);
+            warp_amount_ = 0.012 * fabsf(2.0 - 0.04 * value);
             break;
 
         case PARAM_FILTER:
@@ -226,7 +240,7 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
             // fix to steps 0.125 increments
             value = ((int) (8 * value)) / 8.0;
             // deadzone around zero -> 1
-            if (fabs(value) < 0.5) {
+            if (fabsf(value) < 0.5) {
                 value = 1.0;
             }
             playback_rate_ = value;
@@ -244,8 +258,8 @@ void FloatyPlugin::fixDelayParams() {
 
 void FloatyPlugin::fixFilterParams() {
     float filter_res_ = 0.25 + filter_ * 0.5;
-    float filter_cutoff_ = 45.0 + 40.0 * cos(filter_ / 12.0);
-    filter_gain_ = 2.2 - 1.2 * cos(filter_ / 12.0);
+    float filter_cutoff_ = 45.0 + 40.0 * cosf(filter_ / 12.0);
+    filter_gain_ = 2.2 - 1.2 * cosf(filter_ / 12.0);
 
     float lc = powf(0.5, 4.6 - (filter_cutoff_ / 27.2));
     lpf_.c = lc;
@@ -302,7 +316,7 @@ void FloatyPlugin::advancePlayHead(Channel& ch) {
     // clamp warp_amount_ to prevent overruns.
     // magic number chosen experimentally.
     float max_warp_amount = ((channel_offset_ * delay_ / 100.0) - SMOOTH_OVERLAP) * warp_rate_hz_ / 16000.0;
-    double warp = fmin(max_warp_amount, warp_amount_) * sin(warp_counter_);
+    double warp = fmin(max_warp_amount, warp_amount_) * sinf(warp_counter_);
     ch.play_csr += warp;
     warp_counter_ += warp_rate_rad_;
     ch.play_csr = fmod(ch.play_csr + (samples_frac_t) ch.getModPoint(), ch.getModPoint());
@@ -325,7 +339,7 @@ signal_t FloatyPlugin::readFromPlayHead(const Channel& ch) const {
 // Dampen value if play/rec cursor overlap to prevent clicks.
 
 signal_t FloatyPlugin::fadeNearOverlap(const Channel& ch, signal_t in) const {
-    samples_frac_t overlap_dist = fabs((fmod(ch.play_csr, ch.getModPoint())) - (float) (ch.rec_csr % ch.getModPoint()));
+    samples_frac_t overlap_dist = fabsf((fmod(ch.play_csr, ch.getModPoint())) - (float) (ch.rec_csr % ch.getModPoint()));
     float overlap_mult = (overlap_dist >= SMOOTH_OVERLAP) ? 1.0 : (overlap_dist / SMOOTH_OVERLAP);
     return in * overlap_mult;
 }
@@ -338,7 +352,7 @@ void FloatyPlugin::advanceRecHead(Channel& ch) {
 
 signal_t FloatyPlugin::saturate(const signal_t in) const {
     float shaper_amt = 3.0f - 0.8f * in;
-    return fmax(-CLAMP, fmin(CLAMP, CLAMP * ((1.0 + shaper_amt) * in) / (1.0 + (shaper_amt * fabs(in)))));
+    return fmax(-CLAMP, fmin(CLAMP, CLAMP * ((1.0 + shaper_amt) * in) / (1.0 + (shaper_amt * fabsf(in)))));
 }
 
 // Applies a bandpass filter to the current sample.
