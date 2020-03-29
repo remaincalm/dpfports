@@ -202,6 +202,7 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
 
     switch (index) {
         case PARAM_DELAY_MS:
+        {
             samples_t target_delay = value * srate / 1000.0;
 
             // Snap to nearest 5ms to prevent delay re-initing on tempo jitter.
@@ -210,6 +211,7 @@ void FloatyPlugin::setParameterValue(uint32_t index, float value) {
                 delay_ = target_delay;
                 fixDelayParams();
             }
+        }
             break;
 
         case PARAM_MIX:
