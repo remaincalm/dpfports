@@ -157,6 +157,7 @@ void ParanoiaPlugin::setParameterValue(uint32_t index, float value) {
 
         case PARAM_THERMONUCLEAR_WAR:
             nuclear_ = value;
+            break;
 
         case PARAM_FILTER:
             filter_ = value;
